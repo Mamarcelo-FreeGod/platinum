@@ -1,0 +1,34 @@
+extends ../layout
+
+block content
+  .container.py-4
+    //- Header
+    .text-center.mb-5
+      h1.display-5.fw-bold
+        i.bi.bi-clipboard-check.me-3.text-gold
+        | Mis Rutinas
+      p.text-secondary.fs-5.mt-2 Selecciona una semana para ver tu rutina y registrar tu progreso
+
+    //- ============================================
+    //- PLAN DE ENTRENAMIENTO MENSUAL (SEMANAS 1-4)
+    //- ============================================
+    .row.g-4
+      each semana in [1, 2, 3, 4]
+        .col-md-6.col-lg-3
+          //- PART 6: Resaltar Semana Actual
+          - const extClass = (semana === semanaActual) ? 'border-gold shadow-lg transform-hover card-activa' : 'border-secondary opacity-75'
+          .card.glass-card.h-100.text-center.p-0.overflow-hidden.cursor-pointer(
+            class=extClass,
+            style="transition: all 0.3s ease;",
+            onclick=`window.location='/cliente/rutinas/semana/${semana}'`
+          )
+            if semana === semanaActual
+              .card-header.bg-gold.text-dark.py-1
+                small.fw-bold SEMANA ACTUAL
+            .card-body.d-flex.flex-column.align-items-center.justify-content-center.py-5
+              .mb-3(class=(semana === semanaActual) ? 'text-gold' : 'text-secondary')
+                i.bi.bi-calendar-week(style='font-size: 3rem')
+              h4.fw-bold.text-light Semana #{semana}
+              p.text-muted.small.mb-3 Despliega tus ejercicios y registro
+              button.btn.btn-outline-gold.btn-sm.px-4(type="button")
+                | Ver Semana

@@ -1,0 +1,14 @@
+extends ./layout
+
+block content
+  .container.py-4
+    .row.justify-content-center
+      .col-lg-8
+        .text-center.py-5
+          i.bi.bi-exclamation-triangle.display-1.text-gold
+          h1.fw-bold.mt-4.text-white 404
+          p.lead.text-muted Página no encontrada
+          p.text-muted La página que buscas no existe o fue movida.
+          a.btn.btn-gold.mt-3(href='/')
+            i.bi.bi-house.me-2
+            | Ir al inicio

@@ -1,0 +1,35 @@
+extends ../layout
+
+block content
+  .container.py-4
+    .d-flex.justify-content-between.align-items-center.mb-4
+      div
+        h1.display-6.fw-bold
+          i.bi.bi-graph-up-arrow.me-2.text-gold
+          | Seguimiento de Clientes
+        p.text-secondary.mb-0 Ver el progreso registrado de tus clientes Premium
+        
+    if clientes && clientes.length > 0
+      .row.g-4
+        each cliente in clientes
+          .col-md-6.col-lg-4
+            .card.bg-dark.border-secondary.h-100.shadow-sm
+              .card-body
+                .d-flex.align-items-center.mb-3
+                  .icon-wrapper.bg-warning.text-dark.rounded.p-3.me-3
+                    i.bi.bi-person-badge.fs-4
+                  div
+                    //- AQUI ESTÁ EL FIX: Leer directamente de la consulta SQL
+                    h5.card-title.text-white.mb-1.fw-bold #{cliente.nombre}
+                    p.card-text.text-muted.small.mb-0 #{cliente.correo}
+                
+                p.text-secondary.small Revisa la evolución que ha subido este cliente y déjale comentarios de feedback.
+                
+                //- AQUI ESTÁ EL FIX 2: Asegurar que el href envíe el ID correcto
+                a.btn.btn-warning.w-100.fw-bold.mt-2(href=`/entrenador/seguimiento/${cliente.id}`)
+                  i.bi.bi-eye-fill.me-2
+                  | Ver Progreso
+    else
+      .alert.alert-dark.border-warning.text-warning.text-center
+        i.bi.bi-info-circle-fill.me-2
+        | No tienes clientes Premium asignados actualmente.

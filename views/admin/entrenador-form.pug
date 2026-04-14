@@ -1,0 +1,44 @@
+extends ../layout
+
+block content
+  .container.py-4
+    .row.justify-content-center
+      .col-lg-8
+        h2.fw-bold.text-white.mb-4
+          i.bi.bi-person-plus-fill.text-gold.me-2
+          | Crear Entrenador
+
+        .card.border-0.shadow-sm.glass-card
+          .card-body.p-4
+            form(action='/admin/entrenadores/crear', method='POST')
+              .row.g-3
+                .col-md-6
+                  label.form-label.text-muted(for='nombre') Nombre completo *
+                  input#nombre.form-control(type='text', name='nombre', placeholder='Nombre del entrenador', required)
+
+                .col-md-6
+                  label.form-label.text-muted(for='correo') Correo electrónico *
+                  input#correo.form-control(type='email', name='correo', placeholder='correo@ejemplo.com', required)
+
+                .col-md-6
+                  label.form-label.text-muted(for='telefono') Teléfono
+                  input#telefono.form-control(type='tel', name='telefono', placeholder='Ej: 555-1234')
+
+                .col-md-6
+                  label.form-label.text-muted(for='password') Contraseña *
+                  input#password.form-control(type='password', name='password', placeholder='Mínimo 6 caracteres', required)
+
+                .col-12
+                  .alert.alert-info.border-0.d-flex.align-items-center
+                    i.bi.bi-info-circle-fill.me-2.fs-5
+                    div
+                      strong Este usuario será creado con el rol de Entrenador.
+                      |  Podrá gestionar clientes, rutinas y solicitudes de membresía.
+
+              .d-flex.justify-content-between.mt-4
+                a.btn.btn-outline-secondary(href='/admin/dashboard')
+                  i.bi.bi-arrow-left.me-2
+                  | Cancelar
+                button.btn.btn-gold(type='submit')
+                  i.bi.bi-check-lg.me-2
+                  | Crear Entrenador

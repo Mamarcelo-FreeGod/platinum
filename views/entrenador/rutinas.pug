@@ -1,0 +1,65 @@
+extends ../layout
+
+block content
+  .container.py-4
+    .d-flex.justify-content-between.align-items-center.mb-4
+      div
+        h2.fw-bold.text-white.mb-1
+          i.bi.bi-clipboard-check.text-gold.me-2
+          | Mis Rutinas
+        p.text-secondary.mb-0 Selecciona un cliente para ver y administrar sus rutinas
+      a.btn.btn-gold(href='/entrenador/rutinas/crear')
+        i.bi.bi-plus-circle.me-2
+        | Nueva Rutina
+
+    if clientes && clientes.length > 0
+      .row.g-4
+        each cliente in clientes
+          .col-md-6.col-lg-4
+            a.text-decoration-none(href=`/entrenador/rutinas/cliente/${cliente.id}`)
+              .card.glass-card.h-100.cliente-rutina-card
+                .card-body.p-4
+                  .text-center.mb-3
+                    .profile-avatar.mx-auto.mb-3
+                      i.bi.bi-person-fill.text-gold.fs-2
+                    h5.fw-bold.text-white.mb-1= cliente.nombre
+                    small.text-muted= cliente.correo
+
+                  .d-flex.justify-content-center.gap-3.mb-3
+                    if cliente.peso
+                      .text-center
+                        .text-gold.fw-bold #{cliente.peso}
+                        .text-muted.small kg
+                    if cliente.estatura
+                      .text-center
+                        .text-gold.fw-bold #{cliente.estatura}
+                        .text-muted.small cm
+                    if cliente.sexo
+                      .text-center
+                        .text-gold.fw-bold= cliente.sexo
+                        .text-muted.small sexo
+
+                  if cliente.condicion
+                    .p-2.rounded-3.mb-3(style='background: rgba(250, 204, 21, 0.05); border: 1px solid rgba(250, 204, 21, 0.15)')
+                      small.text-secondary
+                        i.bi.bi-clipboard2-pulse.me-1.text-gold
+                        = cliente.condicion
+
+                  .text-center
+                    span.badge.bg-gold.text-dark.fs-6
+                      i.bi.bi-clipboard-check.me-1
+                      | #{cliente.total_rutinas} rutinas
+
+                .card-footer.border-0.text-center
+                  span.text-gold.fw-semibold.small
+                    | Ver rutinas
+                    i.bi.bi-chevron-right.ms-1
+    else
+      .card.border-0.shadow-sm.glass-card
+        .card-body.p-5.text-center
+          i.bi.bi-clipboard.display-3.text-muted
+          h4.fw-bold.text-white.mt-3 No has creado rutinas aún
+          p.text-muted Asigna clientes y crea rutinas para que aparezcan aquí
+          a.btn.btn-gold.mt-3(href='/entrenador/rutinas/crear')
+            i.bi.bi-plus-circle.me-2
+            | Crear primera rutina

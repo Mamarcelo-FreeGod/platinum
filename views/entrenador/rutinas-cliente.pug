@@ -1,0 +1,70 @@
+extends ../layout
+
+block content
+  style.
+    /* Estilos Premium para Tarjetas de Rutina */
+    .rutina-card {
+      transition: all 0.3s ease;
+      border-radius: 15px;
+    }
+    .rutina-card:hover {
+      transform: translateY(-5px);
+      border-color: #ffc107 !important;
+      box-shadow: 0 10px 20px rgba(255, 193, 7, 0.2) !important;
+      background-color: #1a1a1a !important;
+    }
+    .icon-wrapper {
+      background: rgba(255, 193, 7, 0.1);
+      padding: 15px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+    .accordion-button:not(.collapsed) {
+      background-color: #212529 !important;
+      color: #ffc107 !important;
+      box-shadow: inset 0 -1px 0 rgba(0,0,0,.125);
+    }
+  .container.py-4
+    //- Header
+    .d-flex.align-items-center.mb-4
+      a.btn.btn-outline-gold.me-3(href='/entrenador/rutinas')
+        i.bi.bi-arrow-left
+      div
+        h1.display-6.fw-bold.mb-1
+          i.bi.bi-person-fill.text-gold.me-2
+          | Rutinas de #{cliente.nombre}
+        p.text-secondary.mb-0 Rutinas organizadas por día de la semana
+
+    .accordion#accordionRutinas
+      each semana in [1, 2, 3, 4]
+        - const rutinasDeEstaSemana = rutinasAgrupadas[semana] || []
+        
+        .accordion-item.mb-3.border.border-secondary.rounded.bg-dark
+          h2.accordion-header(id=`headingSemana${semana}`)
+            button.accordion-button.collapsed.bg-dark.text-warning(type="button" data-bs-toggle="collapse" data-bs-target=`#collapseSemana${semana}` aria-expanded="false" aria-controls=`collapseSemana${semana}`)
+              strong Semana #{semana} 
+              span.badge.bg-secondary.ms-2 #{rutinasDeEstaSemana.length} rutinas
+              
+          .accordion-collapse.collapse(id=`collapseSemana${semana}` aria-labelledby=`headingSemana${semana}` data-bs-parent="#accordionRutinas")
+            .accordion-body.bg-dark.text-white
+              if rutinasDeEstaSemana.length === 0
+                .card.border-0.shadow-sm.glass-card
+                  .card-body.p-5.text-center
+                    i.bi.bi-clipboard-x.display-3.text-muted
+                    p.text-muted.mt-3 No hay rutinas asignadas para esta semana.
+                    a.btn.btn-warning.mt-2.fw-bold(href="/entrenador/rutinas/crear") Crear Nueva Rutina
+              else
+                .row.g-3
+                  each rutina in rutinasDeEstaSemana
+                    .col-md-4
+                      .card.rutina-card.h-100.bg-dark.border-secondary.shadow-sm
+                        .card-body.d-flex.flex-column.align-items-center.text-center.p-4
+                          .icon-wrapper.mb-3
+                            i.bi.bi-lightning-charge-fill.fs-2.text-warning
+                          h5.fw-bold.text-white.mb-1 #{rutina.dia_semana}
+                          p.text-muted.small.mb-3 #{rutina.nombre || 'Rutina Personalizada'}
+                          
+                          a.btn.btn-warning.btn-sm.mt-auto.w-100.fw-bold.rounded-pill(href=`/entrenador/rutinas/${rutina.id}`) 
+                            i.bi.bi-eye-fill.me-1
+                            | Ver Rutina
+

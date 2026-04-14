@@ -1,0 +1,111 @@
+extends ../layout
+
+block content
+  .container.py-4
+    //- Welcome header
+    .welcome-banner.mb-4
+      .row.align-items-center
+        .col-md-8
+          h1.fw-bold.text-white
+            | Hola, 
+            span.text-gold= user.nombre
+          p.text-light.mb-0.opacity-75 Panel de entrenador
+        .col-md-4.text-md-end
+          .badge.role-badge-trainer.fs-6
+            i.bi.bi-lightning-fill.me-1
+            | Entrenador
+
+    //- Stats
+    .row.g-4.mb-4
+      .col-md-4
+        .card.stat-card.h-100.border-0
+          .card-body.d-flex.align-items-center
+            .stat-icon.bg-gold-soft.me-3
+              i.bi.bi-people-fill.text-gold.fs-4
+            div
+              h6.text-muted.mb-1 Clientes Asignados
+              h3.fw-bold.text-white.mb-0= totalClientes
+
+      .col-md-4
+        .card.stat-card.h-100.border-0
+          .card-body.d-flex.align-items-center
+            .stat-icon.bg-success-soft.me-3
+              i.bi.bi-clipboard-check.text-success.fs-4
+            div
+              h6.text-muted.mb-1 Rutinas Creadas
+              h3.fw-bold.text-white.mb-0= totalRutinas
+
+      .col-md-4
+        .card.stat-card.h-100.border-0
+          .card-body.d-flex.align-items-center
+            .stat-icon.bg-warning-soft.me-3
+              i.bi.bi-envelope-exclamation.text-warning.fs-4
+            div
+              h6.text-muted.mb-1 Solicitudes Pendientes
+              h3.fw-bold.text-white.mb-0= solicitudesPendientes
+
+    //- Quick Actions (5 secciones)
+    .row.g-4.mb-4
+      .col-6.col-md-4.col-lg
+        a.text-decoration-none(href='/entrenador/rutinas')
+          .card.quick-link-card.h-100.border-0.text-center
+            .card-body.py-4
+              i.bi.bi-clipboard-check.display-5.text-gold
+              h6.fw-semibold.mt-3.text-white Mis Rutinas
+              small.text-muted Ver clientes y rutinas
+      .col-6.col-md-4.col-lg
+        a.text-decoration-none(href='/entrenador/clientes-personalizados')
+          .card.quick-link-card.h-100.border-0.text-center
+            .card-body.py-4
+              i.bi.bi-person-badge.display-5.text-gold
+              h6.fw-semibold.mt-3.text-white Personalizados
+              small.text-muted Rutinas a medida
+      .col-6.col-md-4.col-lg
+        a.text-decoration-none(href='/entrenador/solicitudes-rutina')
+          .card.quick-link-card.h-100.border-0.text-center
+            .card-body.py-4
+              i.bi.bi-clipboard-plus.display-5.text-gold
+              h6.fw-semibold.mt-3.text-white Solicitudes Rutina
+              small.text-muted Peticiones de clientes
+      .col-6.col-md-4.col-lg
+        a.text-decoration-none(href='/entrenador/solicitudes')
+          .card.quick-link-card.h-100.border-0.text-center
+            .card-body.py-4
+              i.bi.bi-envelope-fill.display-5.text-gold
+              h6.fw-semibold.mt-3.text-white Membresías
+              small.text-muted Aprobar / rechazar
+      .col-6.col-md-4.col-lg
+        a.text-decoration-none(href='/entrenador/chat')
+          .card.quick-link-card.h-100.border-0.text-center
+            .card-body.py-4
+              .position-relative.d-inline-block
+                i.bi.bi-chat-dots-fill.display-5.text-gold
+                if chatNoLeidos > 0
+                  span.position-absolute.top-0.start-100.translate-middle.badge.rounded-pill.bg-danger= chatNoLeidos
+              h6.fw-semibold.mt-3.text-white Chat
+              small.text-muted Clientes Premium
+
+    //- Recent routines
+    if ultimasRutinas && ultimasRutinas.length > 0
+      .card.border-0.shadow-sm.glass-card
+        .card-header.border-0.d-flex.justify-content-between.align-items-center
+          h5.mb-0.text-white
+            i.bi.bi-clock-history.text-gold.me-2
+            | Rutinas Recientes
+          a.btn.btn-sm.btn-outline-gold(href='/entrenador/rutinas') Ver todas
+        .card-body.p-0
+          .table-responsive
+            table.table.table-dark-custom.mb-0
+              thead
+                tr
+                  th Rutina
+                  th Cliente
+                  th Día
+                  th Duración
+              tbody
+                each rutina in ultimasRutinas
+                  tr
+                    td.fw-semibold.text-gold= rutina.nombre
+                    td= rutina.cliente_nombre
+                    td= rutina.dia_semana || '—'
+                    td #{rutina.duracion_min} min

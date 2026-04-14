@@ -1,0 +1,61 @@
+extends ../layout
+
+block content
+  .container.py-4
+    .row.justify-content-center
+      .col-lg-8
+        h2.fw-bold.text-white.mb-4
+          i.bi.bi-person-plus.text-gold.me-2
+          if editing
+            | Editar Usuario
+          else
+            | Nuevo Usuario
+
+        .card.border-0.shadow-sm.glass-card
+          .card-body.p-4
+            form(action=editing ? `/admin/usuarios/editar/${usuario.id}` : '/admin/usuarios/crear', method='POST')
+              .row.g-3
+                .col-md-6
+                  label.form-label.text-muted(for='nombre') Nombre completo *
+                  input#nombre.form-control(type='text', name='nombre', value=editing ? usuario.nombre : '', required)
+
+                .col-md-6
+                  label.form-label.text-muted(for='correo') Correo electrónico *
+                  input#correo.form-control(type='email', name='correo', value=editing ? usuario.correo : '', required)
+
+                .col-md-6
+                  label.form-label.text-muted(for='telefono') Teléfono
+                  input#telefono.form-control(type='tel', name='telefono', value=editing ? (usuario.telefono || '') : '')
+
+                .col-md-6
+                  label.form-label.text-muted(for='password')
+                    if editing
+                      | Nueva contraseña (dejar en blanco para no cambiar)
+                    else
+                      | Contraseña *
+                  input#password.form-control(type='password', name='password', required=!editing)
+
+                .col-md-6
+                  label.form-label.text-muted(for='rol') Rol
+                  select#rol.form-select(name='rol')
+                    option(value='cliente', selected=editing && usuario.rol === 'cliente') Cliente
+                    option(value='entrenador', selected=editing && usuario.rol === 'entrenador') Entrenador
+                    option(value='admin', selected=editing && usuario.rol === 'admin') Administrador
+
+                if editing
+                  .col-md-6
+                    label.form-label.text-muted Estado
+                    .form-check.form-switch.mt-2
+                      input#activo.form-check-input(type='checkbox', name='activo', value='1', checked=usuario.activo)
+                      label.form-check-label.text-muted(for='activo') Usuario activo
+
+              .d-flex.justify-content-between.mt-4
+                a.btn.btn-outline-secondary(href='/admin/usuarios')
+                  i.bi.bi-arrow-left.me-2
+                  | Cancelar
+                button.btn.btn-gold(type='submit')
+                  i.bi.bi-check-lg.me-2
+                  if editing
+                    | Actualizar Usuario
+                  else
+                    | Crear Usuario

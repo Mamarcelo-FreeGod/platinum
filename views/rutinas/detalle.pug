@@ -1,0 +1,60 @@
+extends ../layout
+
+block content
+  .container.py-4
+    //- Header
+    .d-flex.align-items-center.mb-4
+      a.btn.btn-outline-gold.me-3(href='/rutinas')
+        i.bi.bi-arrow-left
+      div
+        h1.display-6.fw-bold.mb-1
+          i(class=`bi ${rutina.icono}`, style=`color: ${rutina.color}`)
+          |  #{rutina.titulo}
+        p.text-secondary.mb-0= rutina.descripcion
+
+    //- Ejercicios Grid — Visual Cards (same style as personalized routines)
+    .row.g-4
+      each ej, index in rutina.ejercicios
+        .col-md-6.col-lg-4
+          .ejercicio-card-visual(style=`animation-delay: ${index * 0.08}s`)
+            //- GIF del ejercicio
+            if ej.gif
+              .ejercicio-visual-media
+                img(src=ej.gif, alt=ej.nombre, loading='lazy', onerror="this.parentNode.innerHTML='<div class=\"ejercicio-visual-placeholder\"><i class=\"bi bi-image\"></i></div>'")
+            else
+              .ejercicio-visual-placeholder
+                i.bi.bi-image
+
+            //- Número badge
+            .ejercicio-visual-number #{index + 1}
+
+            //- Contenido
+            .ejercicio-visual-content
+              h5.fw-bold.text-white.mb-2= ej.nombre
+
+              //- Stats
+              .ejercicio-visual-stats
+                if ej.series
+                  .ejercicio-visual-stat
+                    .stat-val= ej.series
+                    .stat-lbl Series
+                if ej.reps
+                  .ejercicio-visual-stat
+                    .stat-val= ej.reps
+                    .stat-lbl Reps
+                if ej.descanso
+                  .ejercicio-visual-stat
+                    .stat-val= ej.descanso
+                    .stat-lbl Descanso
+
+              //- Técnica
+              if ej.tecnica
+                .ejercicio-visual-tecnica
+                  i.bi.bi-lightbulb-fill.text-gold.me-1
+                  small.text-secondary= ej.tecnica
+
+    //- Footer
+    .text-center.mt-5.pt-3
+      a.btn.btn-outline-gold.btn-lg.px-5(href='/rutinas')
+        i.bi.bi-grid-fill.me-2
+        | Ver Todas las Rutinas

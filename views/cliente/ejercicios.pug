@@ -1,0 +1,140 @@
+extends ../layout
+
+block content
+  .container.py-4
+    //- Header
+    .welcome-banner.mb-4
+      .row.align-items-center
+        .col-md-8
+          h1.fw-bold.text-white
+            i.bi.bi-lightning-charge-fill.text-gold.me-2
+            | Ejercicios 
+            span.text-gold Predeterminados
+          p.text-light.mb-0.opacity-75 Explora nuestra selección de ejercicios fundamentales para tu entrenamiento
+        .col-md-4.text-md-end
+          .badge.role-badge.fs-6
+            i.bi.bi-fire.me-1
+            | #{ejercicios.length} ejercicios
+
+    //- Galería de ejercicios
+    .row.g-4.mb-5
+      each ejercicio, i in ejercicios
+        .col-sm-6.col-md-4.col-lg-3
+          .card.exercise-card.h-100.border-0(style=`animation-delay: ${i * 0.08}s`)
+            .exercise-img-wrapper
+              img.exercise-img(src=movimiento_.gif, alt=ejercicio.nombre, loading='lazy')
+              .exercise-grupo-badge
+                span.badge.exercise-badge= ejercicio.grupo
+            .card-body.d-flex.flex-column
+              h5.fw-bold.text-white.mb-2= ejercicio.nombre
+              p.text-muted.small.mb-0.flex-grow-1= ejercicio.descripcion
+
+    //- Sección Solicitar Rutina Personalizada
+    .solicitar-rutina-section.mb-4
+      .card.border-0.glass-card.overflow-hidden
+        .card-body.p-0
+          .row.g-0.align-items-center
+            .col-lg-7.p-4.p-lg-5
+              .d-flex.align-items-center.mb-3
+                .stat-icon.bg-gold-soft.me-3
+                  i.bi.bi-stars.text-gold.fs-4
+                h3.fw-bold.text-white.mb-0 ¿Quieres una rutina a tu medida?
+              p.text-light.mb-4.fs-6
+                | Nuestros entrenadores certificados pueden diseñar una rutina 
+                strong.text-gold personalizada 
+                | basada en tus objetivos, nivel de experiencia y disponibilidad de tiempo.
+              
+              if tienePendiente
+                .alert.alert-warning.d-flex.align-items-center.mb-3
+                  i.bi.bi-clock-history.me-2.fs-5
+                  div
+                    strong Ya tienes una solicitud pendiente.
+                    br
+                    span.small Un entrenador la revisará pronto.
+              else
+                form(action='/cliente/ejercicios/solicitar-rutina', method='POST')
+                  button.btn.btn-gold.btn-lg.px-5.py-3(type='submit', id='btnSolicitarRutina')
+                    i.bi.bi-send-fill.me-2
+                    | Solicitar Rutina Personalizada
+
+            .col-lg-5.d-none.d-lg-block
+              .solicitar-rutina-decoration.h-100.d-flex.align-items-center.justify-content-center.p-4
+                .text-center
+                  i.bi.bi-person-arms-up.display-1.text-gold.mb-3(style='opacity: 0.3')
+                  .d-flex.gap-3.justify-content-center
+                    .text-center
+                      i.bi.bi-clipboard-check.fs-3.text-gold(style='opacity: 0.4')
+                      .small.text-muted.mt-1 Plan
+                    .text-center
+                      i.bi.bi-graph-up-arrow.fs-3.text-gold(style='opacity: 0.4')
+                      .small.text-muted.mt-1 Progreso
+                    .text-center
+                      i.bi.bi-trophy.fs-3.text-gold(style='opacity: 0.4')
+                      .small.text-muted.mt-1 Resultados
+
+    //- Historial de solicitudes
+    if solicitudes && solicitudes.length > 0
+      .card.border-0.shadow-sm.glass-card
+        .card-header.border-0.d-flex.justify-content-between.align-items-center
+          h5.mb-0.text-white
+            i.bi.bi-clock-history.text-gold.me-2
+            | Mis Solicitudes de Rutina
+        .card-body.p-0
+          .table-responsive
+            table.table.table-dark-custom.mb-0
+              thead
+                tr
+                  th #
+                  th Fecha
+                  th Estado
+                  th Rutina Asignada
+              tbody
+                each sol, i in solicitudes
+                  tr
+                    td.text-muted= i + 1
+                    td= new Date(sol.fecha).toLocaleDateString('es-MX', { year: 'numeric', month: 'long', day: 'numeric' })
+                    td
+                      if sol.estado === 'pendiente'
+                        span.badge.bg-warning.text-dark
+                          i.bi.bi-clock.me-1
+                          | Pendiente
+                      else if sol.estado === 'aceptada'
+                        span.badge.bg-success
+                          i.bi.bi-check-circle.me-1
+                          | Aceptada
+                      else
+                        span.badge.bg-danger
+                          i.bi.bi-x-circle.me-1
+                          | Rechazada
+                    td
+                      if sol.estado === 'aceptada' && sol.rutina_texto
+                        button.btn.btn-sm.btn-outline-gold(type='button', data-bs-toggle='modal', data-bs-target=`#rutinaModal${sol.id}`)
+                          i.bi.bi-eye.me-1
+                          | Ver Rutina
+                      else if sol.estado === 'pendiente'
+                        span.text-muted.small
+                          i.bi.bi-hourglass-split.me-1
+                          | En espera...
+                      else
+                        span.text-muted —
+
+    //- Modales para ver rutinas aceptadas
+    if solicitudes && solicitudes.length > 0
+      each sol in solicitudes
+        if sol.estado === 'aceptada' && sol.rutina_texto
+          .modal.fade(id=`rutinaModal${sol.id}`, tabindex='-1')
+            .modal-dialog.modal-lg.modal-dialog-centered
+              .modal-content.modal-dark
+                .modal-header.border-0
+                  h5.modal-title.text-white
+                    i.bi.bi-clipboard-check.text-gold.me-2
+                    | Tu Rutina Personalizada
+                  button.btn-close(type='button', data-bs-dismiss='modal')
+                .modal-body
+                  .p-3
+                    pre.rutina-texto-display= sol.rutina_texto
+                .modal-footer.border-0
+                  small.text-muted
+                    i.bi.bi-calendar.me-1
+                    | Asignada el #{new Date(sol.fecha_respuesta).toLocaleDateString('es-MX', { year: 'numeric', month: 'long', day: 'numeric' })}
+                  button.btn.btn-outline-gold(type='button', data-bs-dismiss='modal') Cerrar

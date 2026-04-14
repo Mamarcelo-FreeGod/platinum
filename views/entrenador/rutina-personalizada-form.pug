@@ -1,0 +1,337 @@
+extends ../layout
+
+block content
+  .container.py-4
+    //- Header
+    .d-flex.align-items-center.mb-4
+      if clientePrecargado && solicitud.usuario_id
+        a.btn.btn-outline-gold.me-3(href=`/entrenador/rutinas/cliente/${solicitud.usuario_id}`)
+          i.bi.bi-arrow-left
+      else
+        a.btn.btn-outline-gold.me-3(href='/entrenador/clientes-personalizados')
+          i.bi.bi-arrow-left
+      div
+        h1.display-6.fw-bold
+          i.bi.bi-clipboard-plus.me-2.text-gold
+          | Crear Rutina Personalizada
+        p.text-secondary.mb-0 Diseña rutinas independientes para cada día de la semana
+
+    .row.g-4
+      //- Client Info Sidebar
+      .col-lg-4
+        .card.glass-card.mb-4
+          .card-header
+            h6.mb-0.fw-bold.text-light
+              i.bi.bi-person-fill.me-2.text-gold
+              | Datos del Cliente
+          .card-body.p-4
+            .text-center.mb-3
+              .profile-avatar.mx-auto.mb-3
+                i.bi.bi-person-fill.text-gold.fs-2
+              h5.fw-bold.text-light= solicitud.cliente_nombre
+              small.text-muted= solicitud.cliente_correo
+
+            .list-group.list-group-flush
+              if solicitud.peso
+                .list-group-item.bg-transparent.border-secondary.d-flex.justify-content-between.py-3
+                  span.text-muted
+                    i.bi.bi-speedometer.me-1
+                    | Peso
+                  span.fw-bold.text-light #{solicitud.peso} kg
+              if solicitud.estatura
+                .list-group-item.bg-transparent.border-secondary.d-flex.justify-content-between.py-3
+                  span.text-muted
+                    i.bi.bi-rulers.me-1
+                    | Estatura
+                  span.fw-bold.text-light #{solicitud.estatura} cm
+              if solicitud.sexo
+                .list-group-item.bg-transparent.border-secondary.d-flex.justify-content-between.py-3
+                  span.text-muted
+                    i.bi.bi-gender-ambiguous.me-1
+                    | Sexo
+                  span.fw-bold.text-light= solicitud.sexo
+              if !solicitud.peso && !solicitud.estatura && !solicitud.sexo
+                .text-center.py-3
+                  small.text-muted Sin datos físicos registrados
+
+            if solicitud.condicion
+              .mt-3.p-3.rounded-3(style='background: rgba(250, 204, 21, 0.05); border: 1px solid rgba(250, 204, 21, 0.15)')
+                small.text-gold.fw-bold.d-block.mb-1
+                  i.bi.bi-clipboard2-pulse.me-1
+                  | Condición / Objetivos:
+                p.small.text-secondary.mb-0= solicitud.condicion
+
+        //- Instructions Card
+        .card.glass-card
+          .card-header
+            h6.mb-0.fw-bold.text-light
+              i.bi.bi-info-circle.me-2.text-gold
+              | Instrucciones
+          .card-body.p-4
+            .small.text-secondary
+              p.mb-2 
+                i.bi.bi-check-circle.text-success.me-1
+                | Selecciona los días de entrenamiento
+              p.mb-2
+                i.bi.bi-check-circle.text-success.me-1
+                | Cada día tiene su rutina independiente
+              p.mb-2
+                i.bi.bi-check-circle.text-success.me-1
+                | Agrega ejercicios diferentes por día
+              p.mb-0
+                i.bi.bi-check-circle.text-success.me-1
+                | Las imágenes/GIFs son opcionales
+
+      //- Form
+      .col-lg-8
+        form(action=`/entrenador/rutina-personalizada/crear/${solicitud.id}`, method='POST', enctype='multipart/form-data', id='rutinaForm')
+          //- Hidden field for rutinas_por_dia JSON
+          input(type='hidden', name='rutinas_por_dia', id='rutinasPorDiaInput')
+          //- Si el cliente viene precargado, enviar usuario_id como hidden
+          if clientePrecargado && solicitud.usuario_id
+            input(type='hidden', name='usuario_id', value=solicitud.usuario_id)
+
+          //- General Info
+          .card.glass-card.mb-4
+            .card-header
+              h6.mb-0.fw-bold.text-light
+                i.bi.bi-gear.me-2.text-gold
+                | Configuración General
+            .card-body.p-4
+              .row.g-3
+                .col-md-6
+                  label.form-label.text-muted Semana de Entrenamiento a asignar (puedes elegir varias)
+                  .d-flex.flex-wrap.gap-3.mt-2
+                    each val in [1, 2, 3, 4]
+                      .form-check
+                        input.form-check-input(type='checkbox', name='semanas[]', value=val, id=`semana${val}`)
+                        label.form-check-label.text-white(for=`semana${val}`) Sem #{val}
+
+                .col-md-6
+                  label.form-label.text-muted
+                    i.bi.bi-clock.me-1.text-gold
+                    | Duración por sesión (minutos)
+                  input.form-control#duracion_min(type='number', name='duracion_min', value='60', min='15', max='180')
+
+                .col-12
+                  label.form-label.text-muted Descripción general de la rutina
+                    small.text-muted.ms-2 (Opcional, aplica a todas)
+                  textarea.form-control#descripcion(name='descripcion', rows='2', placeholder='Breve descripción general del plan de entrenamiento')
+
+          //- Day Selector
+          .card.glass-card.mb-4
+            .card-header
+              h6.mb-0.fw-bold.text-light
+                i.bi.bi-calendar3.me-2.text-gold
+                | Selecciona los Días de Entrenamiento
+            .card-body.p-4
+              .dia-selector-grid
+                each diaLabel, idx in ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo']
+                  - var diaColors = ['#3b82f6', '#8b5cf6', '#f59e0b', '#22c55e', '#ef4444', '#06b6d4', '#ec4899']
+                  .dia-toggle-btn(data-dia=diaLabel, onclick=`toggleDia('${diaLabel}')`, style=`--dia-color: ${diaColors[idx]}`)
+                    .dia-toggle-check
+                      i.bi.bi-check-lg
+                    span.dia-toggle-label= diaLabel
+
+          //- Day Panels Container
+          #diasPanelsContainer
+
+          //- Submit
+          .text-end.mt-4
+            button.btn.btn-gold.btn-lg.px-5(type='submit')
+              i.bi.bi-check-circle-fill.me-2
+              | Crear Rutinas
+
+  //- ==================== EJERCICIO TEMPLATE ====================
+  template#ejercicioTemplate
+    .ejercicio-block.glass-card.mb-3.p-4(data-index='0')
+      .d-flex.justify-content-between.align-items-center.mb-3
+        .d-flex.align-items-center.gap-2
+          span.badge.bg-gold.text-dark.fs-6.ejercicio-badge #1
+          h6.fw-bold.text-white.mb-0 Ejercicio
+        button.btn.btn-sm.btn-outline-danger(type='button', onclick='eliminarEjercicioDelDia(this)')
+          i.bi.bi-trash.me-1
+          | Eliminar
+      .row.g-3
+        .col-md-6
+          label.form-label.text-muted Nombre del ejercicio *
+          input.form-control.ej-nombre(type='text', placeholder='Ej: Press Plano con Barra', required)
+        .col-md-3
+          label.form-label.text-muted Series
+          select.form-select.ej-series
+            option(value='3') 3
+            option(value='4') 4
+            option(value='5') 5
+        .col-md-3
+          label.form-label.text-muted Repeticiones
+          select.form-select.ej-reps
+            option(value='6-8') 6-8
+            option(value='8-10') 8-10
+            option(value='8-12') 8-12
+            option(value='10-12') 10-12
+            option(value='12-15') 12-15
+        .col-md-4
+          label.form-label.text-muted Descanso
+          select.form-select.ej-descanso
+            option(value='30-45s') 30-45 segundos
+            option(value='45-60s') 45-60 segundos
+            option(value='1-2min') 1-2 minutos
+            option(value='2-3min') 2-3 minutos
+        .col-md-8
+          label.form-label.text-muted Técnica / Notas
+          textarea.form-control.ej-tecnica(rows='2', placeholder='Instrucciones de técnica para el cliente...')
+        .col-12
+          label.form-label.text-muted
+            i.bi.bi-image.me-1.text-gold
+            | Imagen / GIF del ejercicio
+            small.text-muted.ms-1 (Opcional)
+          input.form-control.ej-media(type='file', name='media_ejercicio', accept='image/*,image/gif')
+
+  //- ==================== SCRIPTS ====================
+  script.
+    var diasActivos = {};
+
+    function toggleDia(dia) {
+      var btn = document.querySelector('.dia-toggle-btn[data-dia="' + dia + '"]');
+      if (diasActivos[dia]) {
+        // Desactivar
+        delete diasActivos[dia];
+        btn.classList.remove('active');
+        var panel = document.getElementById('panel_' + dia);
+        if (panel) panel.remove();
+      } else {
+        // Activar
+        diasActivos[dia] = { nombre: 'Rutina ' + dia, calentamiento: '', ejercicios: [] };
+        btn.classList.add('active');
+        crearPanelDia(dia);
+      }
+    }
+
+    function crearPanelDia(dia) {
+      var container = document.getElementById('diasPanelsContainer');
+      var panel = document.createElement('div');
+      panel.id = 'panel_' + dia;
+      panel.className = 'card glass-card mb-4 dia-panel-card';
+      panel.setAttribute('data-dia', dia);
+
+      panel.innerHTML = '' +
+        '<div class="card-header d-flex justify-content-between align-items-center">' +
+          '<h6 class="mb-0 fw-bold text-light">' +
+            '<i class="bi bi-calendar-event me-2 text-gold"></i>' +
+            'Rutina del ' + dia +
+          '</h6>' +
+          '<span class="badge bg-gold text-dark ejercicios-count-' + dia + '">0 ejercicios</span>' +
+        '</div>' +
+        '<div class="card-body p-4">' +
+          '<div class="row g-3 mb-4">' +
+            '<div class="col-md-6">' +
+              '<label class="form-label text-muted"><i class="bi bi-tag-fill me-1 text-gold"></i> Nombre de la rutina</label>' +
+              '<input type="text" class="form-control dia-nombre" value="Rutina ' + dia + '" placeholder="Nombre de la rutina del ' + dia + '">' +
+            '</div>' +
+            '<div class="col-md-6">' +
+              '<label class="form-label text-muted">🔥 Calentamiento</label>' +
+              '<input type="text" class="form-control dia-calentamiento" placeholder="Ej: 5-10 min cardio + movilidad">' +
+            '</div>' +
+          '</div>' +
+          '<div class="ejercicios-container-' + dia + '">' +
+            '<div class="text-center text-muted py-3 ejercicios-empty-' + dia + '">' +
+              '<i class="bi bi-clipboard-plus display-6 d-block mb-2" style="opacity:0.3"></i>' +
+              '<small>Sin ejercicios. Haz clic en "Agregar Ejercicio"</small>' +
+            '</div>' +
+          '</div>' +
+          '<div class="text-center mt-3">' +
+            '<button type="button" class="btn btn-sm btn-gold" onclick="agregarEjercicioAlDia(\'' + dia + '\')">' +
+              '<i class="bi bi-plus-circle me-1"></i> Agregar Ejercicio' +
+            '</button>' +
+          '</div>' +
+        '</div>';
+
+      container.appendChild(panel);
+    }
+
+    function agregarEjercicioAlDia(dia) {
+      var template = document.getElementById('ejercicioTemplate');
+      var container = document.querySelector('.ejercicios-container-' + dia);
+      var empty = document.querySelector('.ejercicios-empty-' + dia);
+      if (empty) empty.style.display = 'none';
+
+      var clone = template.content.cloneNode(true);
+      var block = clone.querySelector('.ejercicio-block');
+      block.setAttribute('data-dia', dia);
+
+      container.appendChild(clone);
+      actualizarConteoDelDia(dia);
+    }
+
+    function eliminarEjercicioDelDia(btn) {
+      var block = btn.closest('.ejercicio-block');
+      var dia = block.getAttribute('data-dia');
+      block.remove();
+      actualizarConteoDelDia(dia);
+
+      var container = document.querySelector('.ejercicios-container-' + dia);
+      var bloques = container.querySelectorAll('.ejercicio-block');
+      if (bloques.length === 0) {
+        var empty = document.querySelector('.ejercicios-empty-' + dia);
+        if (empty) empty.style.display = 'block';
+      }
+    }
+
+    function actualizarConteoDelDia(dia) {
+      var container = document.querySelector('.ejercicios-container-' + dia);
+      var bloques = container.querySelectorAll('.ejercicio-block');
+      var countBadge = document.querySelector('.ejercicios-count-' + dia);
+      if (countBadge) {
+        countBadge.textContent = bloques.length + ' ejercicio' + (bloques.length !== 1 ? 's' : '');
+      }
+
+      // Update badges
+      bloques.forEach(function(b, i) {
+        var badge = b.querySelector('.ejercicio-badge');
+        if (badge) badge.textContent = '#' + (i + 1);
+      });
+    }
+
+    document.getElementById('rutinaForm').addEventListener('submit', function(e) {
+      var result = {};
+      var diasKeys = Object.keys(diasActivos);
+
+      if (diasKeys.length === 0) {
+        e.preventDefault();
+        alert('Debes seleccionar al menos un día de entrenamiento.');
+        return;
+      }
+
+      for (var i = 0; i < diasKeys.length; i++) {
+        var dia = diasKeys[i];
+        var panel = document.getElementById('panel_' + dia);
+        if (!panel) continue;
+
+        var nombreInput = panel.querySelector('.dia-nombre');
+        var calentamientoInput = panel.querySelector('.dia-calentamiento');
+        var container = panel.querySelector('.ejercicios-container-' + dia);
+        var bloques = container.querySelectorAll('.ejercicio-block');
+
+        var ejercicios = [];
+        bloques.forEach(function(block) {
+          var nombre = block.querySelector('.ej-nombre').value.trim();
+          if (nombre) {
+            ejercicios.push({
+              nombre: nombre,
+              series: block.querySelector('.ej-series').value.trim() || '',
+              reps: block.querySelector('.ej-reps').value.trim() || '',
+              descanso: block.querySelector('.ej-descanso').value.trim() || '',
+              tecnica: block.querySelector('.ej-tecnica').value.trim() || ''
+            });
+          }
+        });
+
+        result[dia] = {
+          nombre: nombreInput ? nombreInput.value.trim() : 'Rutina ' + dia,
+          calentamiento: calentamientoInput ? calentamientoInput.value.trim() : '',
+          ejercicios: ejercicios
+        };
+      }
+
+      document.getElementById('rutinasPorDiaInput').value = JSON.stringify(result);
+    });

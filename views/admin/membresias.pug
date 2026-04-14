@@ -1,0 +1,51 @@
+extends ../layout
+
+block content
+  .container.py-4
+    .d-flex.justify-content-between.align-items-center.mb-4
+      h2.fw-bold.text-white.mb-0
+        i.bi.bi-card-checklist.text-gold.me-2
+        | Gestión de Membresías
+      .text-muted
+        i.bi.bi-info-circle.me-1
+        | Solo existen 3 planes: Básica, Plus y Premium
+
+    if membresias && membresias.length > 0
+      .row.g-4
+        each m in membresias
+          .col-md-4
+            .card.border-0.shadow-sm.glass-card.h-100.membership-card
+              .card-body.p-4
+                .d-flex.justify-content-between.align-items-start.mb-3
+                  div
+                    h5.fw-bold.text-gold.mb-1= m.nombre
+                    if m.tipo === 'basica'
+                      span.badge.bg-secondary Básica
+                    else if m.tipo === 'plus'
+                      span.badge.bg-info Plus
+                    else if m.tipo === 'premium'
+                      span.badge.bg-warning.text-dark Premium
+                  if m.activa
+                    span.badge.bg-success Activa
+                  else
+                    span.badge.bg-danger Inactiva
+
+                .display-6.fw-bold.text-white.mb-2
+                  | $#{parseFloat(m.precio).toLocaleString('es-MX', {minimumFractionDigits: 2})}
+                
+                p.text-muted.small= m.descripcion || 'Sin descripción'
+
+                .badge.bg-dark.text-gold.mb-3
+                  i.bi.bi-clock.me-1
+                  | #{m.duracion} días
+
+                .d-flex.gap-2
+                  a.btn.btn-sm.btn-outline-gold.flex-fill(href=`/admin/membresias/editar/${m.id}`)
+                    i.bi.bi-pencil.me-1
+                    | Editar
+    else
+      .card.border-0.shadow-sm.glass-card
+        .card-body.p-5.text-center
+          i.bi.bi-exclamation-triangle.display-3.text-warning
+          h4.fw-bold.text-white.mt-3 No hay membresías registradas
+          p.text-muted Importa el archivo schema.sql para crear las 3 membresías base.

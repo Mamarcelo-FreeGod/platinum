@@ -1,0 +1,72 @@
+extends ../layout
+
+block content
+  .container.py-4
+    h2.fw-bold.text-white.mb-4
+      i.bi.bi-envelope-fill.text-gold.me-2
+      | Solicitudes de Membresía
+
+    if solicitudes && solicitudes.length > 0
+      .card.border-0.shadow-sm.glass-card
+        .card-body.p-0
+          .table-responsive
+            table.table.table-dark-custom.mb-0
+              thead
+                tr
+                  th #
+                  th Cliente
+                  th Membresía
+                  th Precio
+                  th Método de Pago
+                  th Fecha
+                  th Estado
+                  th Acciones
+              tbody
+                each solicitud, i in solicitudes
+                  tr
+                    td.text-muted= i + 1
+                    td
+                      .fw-semibold= solicitud.usuario_nombre
+                      small.text-muted= solicitud.usuario_correo
+                    td.text-gold.fw-semibold= solicitud.membresia_nombre
+                    td.text-gold $#{parseFloat(solicitud.membresia_precio).toLocaleString('es-MX', {minimumFractionDigits: 2})}
+                    td
+                      if solicitud.metodo_pago === 'transferencia'
+                        span.badge.bg-info
+                          i.bi.bi-bank.me-1
+                          | Transferencia
+                      else
+                        span.badge.bg-success
+                          i.bi.bi-cash.me-1
+                          | Efectivo
+                    td= new Date(solicitud.created_at).toLocaleDateString('es-MX')
+                    td
+                      if solicitud.estado === 'pendiente'
+                        span.badge.bg-warning.text-dark
+                          i.bi.bi-clock.me-1
+                          | Pendiente
+                      else if solicitud.estado === 'aceptada'
+                        span.badge.bg-success
+                          i.bi.bi-check-circle.me-1
+                          | Aceptada
+                      else
+                        span.badge.bg-danger
+                          i.bi.bi-x-circle.me-1
+                          | Rechazada
+                    td
+                      if solicitud.estado === 'pendiente'
+                        .btn-group.btn-group-sm
+                          a.btn.btn-success(href=`/admin/solicitudes/aprobar/${solicitud.id}`, title='Aprobar')
+                            i.bi.bi-check-lg.me-1
+                            | Aprobar
+                          a.btn.btn-danger(href=`/admin/solicitudes/rechazar/${solicitud.id}`, title='Rechazar')
+                            i.bi.bi-x-lg.me-1
+                            | Rechazar
+                      else
+                        span.text-muted —
+    else
+      .card.border-0.shadow-sm.glass-card
+        .card-body.p-5.text-center
+          i.bi.bi-envelope-open.display-3.text-muted
+          h4.fw-bold.text-white.mt-3 No hay solicitudes de membresía
+          p.text-muted Las solicitudes de los clientes aparecerán aquí
