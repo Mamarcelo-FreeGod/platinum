@@ -1,5 +1,5 @@
 /**
- * GYM PLATINUM - Aplicación Principal
+ * GYM PLATINUM - Aplicación Principal (Versión para Render)
  * Sistema de gestión para gimnasio
  */
 require('dotenv').config();
@@ -10,7 +10,9 @@ const path = require('path');
 
 const app = express();
 
-// ==================== CONFIGURACIÓN ====================
+// 1. CONFIGURACIÓN PARA RENDER (¡IMPORTANTE!)
+// Esto permite que las cookies de sesión funcionen correctamente a través del proxy de Render
+app.set('trust proxy', 1);
 
 // Motor de vistas Pug
 app.set('view engine', 'pug');
@@ -29,6 +31,8 @@ app.use(session({
     resave: false,
     saveUninitialized: false,
     cookie: {
+        secure: true, // Cambiado a true porque Render usa HTTPS
+        sameSite: 'lax',
         maxAge: 1000 * 60 * 60 * 24 // 24 horas
     }
 }));
@@ -42,7 +46,6 @@ app.use(async (req, res, next) => {
     res.locals.success_msg = req.flash('success');
     res.locals.error_msg = req.flash('error');
 
-    // Notificaciones para navbar si hay sesión
     if (req.session.user) {
         try {
             const Notificacion = require('./models/Notificacion');
@@ -53,7 +56,6 @@ app.use(async (req, res, next) => {
             res.locals.ultimasNotificaciones = [];
         }
 
-        // Cargar tipo de membresía para clientes
         if (req.session.user.rol === 'cliente') {
             try {
                 const Membresia = require('./models/Membresia');
@@ -65,7 +67,6 @@ app.use(async (req, res, next) => {
                 res.locals.tipoMembresia = null;
             }
         } else {
-            // Admins y entrenadores tienen acceso completo
             req.tipoMembresia = 'premium';
             res.locals.tipoMembresia = 'premium';
         }
@@ -75,7 +76,6 @@ app.use(async (req, res, next) => {
         req.tipoMembresia = null;
         res.locals.tipoMembresia = null;
     }
-
     next();
 });
 
@@ -87,23 +87,18 @@ const entrenadorRoutes = require('./routes/entrenador');
 const notificacionRoutes = require('./routes/notificaciones');
 const rutinasRoutes = require('./routes/rutinas');
 
-app.use('/', authRoutes);
+// Las rutas hijas primero
 app.use('/cliente', clienteRoutes);
 app.use('/admin', adminRoutes);
 app.use('/entrenador', entrenadorRoutes);
 app.use('/notificaciones', notificacionRoutes);
 app.use('/rutinas', rutinasRoutes);
 
-// Ruta raíz
-app.get('/', (req, res) => {
-    if (req.session.user) {
-        const rol = req.session.user.rol;
-        if (rol === 'admin') return res.redirect('/admin/dashboard');
-        if (rol === 'entrenador') return res.redirect('/entrenador/dashboard');
-        return res.redirect('/cliente/dashboard');
-    }
-    res.redirect('/login');
-});
+// El authRoutes manejará la raíz '/' y el '/login' internamente
+app.use('/', authRoutes);
+
+// ELIMINADO: app.get('/') que redireccionaba a /login. 
+// Ahora authRoutes debe encargarse de decidir qué mostrar en la raíz.
 
 // 404
 app.use((req, res) => {
@@ -113,11 +108,5 @@ app.use((req, res) => {
 // ==================== INICIAR SERVIDOR ====================
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-    console.log(`
-  ╔══════════════════════════════════════════╗
-  ║       🏋️  GYM PLATINUM v2.1.0  🏋️        ║
-  ║   Servidor corriendo en puerto ${PORT}       ║
-  ║   http://localhost:${PORT}                  ║
-  ╚══════════════════════════════════════════╝
-  `);
+    console.log(`Servidor corriendo en puerto ${PORT}`);
 });
