@@ -1,9 +1,5 @@
 /**
-<<<<<<< HEAD
  * GYM PLATINUM - Aplicación Principal
-=======
- * GYM PLATINUM - Aplicación Principal (Versión para Render)
->>>>>>> 7c44f65b448f5fec62781507395f22655ea37ace
  * Sistema de gestión para gimnasio
  */
 require('dotenv').config();
@@ -14,13 +10,7 @@ const path = require('path');
 
 const app = express();
 
-<<<<<<< HEAD
 // ==================== CONFIGURACIÓN ====================
-=======
-// 1. CONFIGURACIÓN PARA RENDER (¡IMPORTANTE!)
-// Esto permite que las cookies de sesión funcionen correctamente a través del proxy de Render
-app.set('trust proxy', 1);
->>>>>>> 7c44f65b448f5fec62781507395f22655ea37ace
 
 // Motor de vistas Pug
 app.set('view engine', 'pug');
@@ -39,11 +29,6 @@ app.use(session({
     resave: false,
     saveUninitialized: false,
     cookie: {
-<<<<<<< HEAD
-=======
-        secure: true, // Cambiado a true porque Render usa HTTPS
-        sameSite: 'lax',
->>>>>>> 7c44f65b448f5fec62781507395f22655ea37ace
         maxAge: 1000 * 60 * 60 * 24 // 24 horas
     }
 }));
@@ -57,10 +42,7 @@ app.use(async (req, res, next) => {
     res.locals.success_msg = req.flash('success');
     res.locals.error_msg = req.flash('error');
 
-<<<<<<< HEAD
     // Notificaciones para navbar si hay sesión
-=======
->>>>>>> 7c44f65b448f5fec62781507395f22655ea37ace
     if (req.session.user) {
         try {
             const Notificacion = require('./models/Notificacion');
@@ -71,10 +53,7 @@ app.use(async (req, res, next) => {
             res.locals.ultimasNotificaciones = [];
         }
 
-<<<<<<< HEAD
         // Cargar tipo de membresía para clientes
-=======
->>>>>>> 7c44f65b448f5fec62781507395f22655ea37ace
         if (req.session.user.rol === 'cliente') {
             try {
                 const Membresia = require('./models/Membresia');
@@ -86,10 +65,7 @@ app.use(async (req, res, next) => {
                 res.locals.tipoMembresia = null;
             }
         } else {
-<<<<<<< HEAD
             // Admins y entrenadores tienen acceso completo
-=======
->>>>>>> 7c44f65b448f5fec62781507395f22655ea37ace
             req.tipoMembresia = 'premium';
             res.locals.tipoMembresia = 'premium';
         }
@@ -99,10 +75,6 @@ app.use(async (req, res, next) => {
         req.tipoMembresia = null;
         res.locals.tipoMembresia = null;
     }
-<<<<<<< HEAD
-
-=======
->>>>>>> 7c44f65b448f5fec62781507395f22655ea37ace
     next();
 });
 
@@ -114,18 +86,13 @@ const entrenadorRoutes = require('./routes/entrenador');
 const notificacionRoutes = require('./routes/notificaciones');
 const rutinasRoutes = require('./routes/rutinas');
 
-<<<<<<< HEAD
 app.use('/', authRoutes);
-=======
-// Las rutas hijas primero
->>>>>>> 7c44f65b448f5fec62781507395f22655ea37ace
 app.use('/cliente', clienteRoutes);
 app.use('/admin', adminRoutes);
 app.use('/entrenador', entrenadorRoutes);
 app.use('/notificaciones', notificacionRoutes);
 app.use('/rutinas', rutinasRoutes);
 
-<<<<<<< HEAD
 // Ruta raíz
 app.get('/', (req, res) => {
     if (req.session.user) {
@@ -136,13 +103,6 @@ app.get('/', (req, res) => {
     }
     res.redirect('/login');
 });
-=======
-// El authRoutes manejará la raíz '/' y el '/login' internamente
-app.use('/', authRoutes);
-
-// ELIMINADO: app.get('/') que redireccionaba a /login. 
-// Ahora authRoutes debe encargarse de decidir qué mostrar en la raíz.
->>>>>>> 7c44f65b448f5fec62781507395f22655ea37ace
 
 // 404
 app.use((req, res) => {
@@ -152,7 +112,6 @@ app.use((req, res) => {
 // ==================== INICIAR SERVIDOR ====================
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-<<<<<<< HEAD
     console.log(`
   ╔══════════════════════════════════════════╗
   ║       🏋️  GYM PLATINUM v2.1.0  🏋️        ║
@@ -161,7 +120,3 @@ app.listen(PORT, () => {
   ╚══════════════════════════════════════════╝
   `);
 });
-=======
-    console.log(`Servidor corriendo en puerto ${PORT}`);
-});
->>>>>>> 7c44f65b448f5fec62781507395f22655ea37ace
