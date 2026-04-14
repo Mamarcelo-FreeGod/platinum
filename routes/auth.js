@@ -5,6 +5,13 @@ const express = require('express');
 const router = express.Router();
 const authController = require('../controllers/authController');
 
+// --- AGREGA ESTO AQUÍ ---
+// Redirigir la raíz al login
+router.get('/', (req, res) => {
+    res.redirect('/login');
+});
+// ------------------------
+
 // Login
 router.get('/login', authController.showLogin);
 router.post('/login', authController.login);
