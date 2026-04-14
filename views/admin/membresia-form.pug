@@ -1,0 +1,60 @@
+extends ../layout
+
+block content
+  .container.py-4
+    .row.justify-content-center
+      .col-lg-8
+        h2.fw-bold.text-white.mb-4
+          i.bi.bi-card-checklist.text-gold.me-2
+          | Editar Membresía
+
+        .card.border-0.shadow-sm.glass-card
+          .card-body.p-4
+            //- Mostrar tipo de plan como badge no editable
+            .mb-3.text-center
+              if membresia.tipo === 'basica'
+                span.badge.bg-secondary.fs-6.px-3.py-2
+                  i.bi.bi-lightning-charge.me-1
+                  | Plan Básica
+              else if membresia.tipo === 'plus'
+                span.badge.bg-info.fs-6.px-3.py-2
+                  i.bi.bi-stars.me-1
+                  | Plan Plus
+              else if membresia.tipo === 'premium'
+                span.badge.bg-warning.text-dark.fs-6.px-3.py-2
+                  i.bi.bi-gem.me-1
+                  | Plan Premium
+
+            form(action=`/admin/membresias/editar/${membresia.id}`, method='POST')
+              .row.g-3
+                .col-md-6
+                  label.form-label.text-muted(for='nombre') Nombre *
+                  input#nombre.form-control(type='text', name='nombre', value=membresia.nombre, required)
+
+                .col-md-6
+                  label.form-label.text-muted(for='precio') Precio (MXN) *
+                  .input-group
+                    span.input-group-text $
+                    input#precio.form-control(type='number', name='precio', step='0.01', min='0', value=membresia.precio, required)
+
+                .col-md-6
+                  label.form-label.text-muted(for='duracion') Duración (días) *
+                  input#duracion.form-control(type='number', name='duracion', min='1', value=membresia.duracion, required)
+
+                .col-md-6
+                  label.form-label.text-muted Estado
+                  .form-check.form-switch.mt-2
+                    input#activa.form-check-input(type='checkbox', name='activa', value='1', checked=membresia.activa)
+                    label.form-check-label.text-muted(for='activa') Membresía activa
+
+                .col-12
+                  label.form-label.text-muted(for='descripcion') Descripción
+                  textarea#descripcion.form-control(name='descripcion', rows='3')= membresia.descripcion
+
+              .d-flex.justify-content-between.mt-4
+                a.btn.btn-outline-secondary(href='/admin/membresias')
+                  i.bi.bi-arrow-left.me-2
+                  | Cancelar
+                button.btn.btn-gold(type='submit')
+                  i.bi.bi-check-lg.me-2
+                  | Actualizar Membresía

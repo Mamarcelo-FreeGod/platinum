@@ -1,0 +1,161 @@
+extends ../layout
+
+block content
+  .container.py-4
+    //- Header
+    a.btn.btn-outline-warning.mb-4(href=`/cliente/rutinas/semana/${rutina.semana}`)
+      i.bi.bi-arrow-left.me-2
+      | Volver a la Semana #{rutina.semana}
+
+    .row.mb-4
+      .col-12
+        h2.fw-bold.text-warning 
+          i.bi.bi-calendar-day.me-2
+          | Rutina del #{rutina.dia_semana}
+        h4.text-light.mt-2 
+          i.bi.bi-lightning-charge-fill.me-2.text-warning
+          | #{rutina.nombre}
+        
+        if rutina.descripcion
+          p.text-muted.mt-2 #{rutina.descripcion}
+
+    //- Rutina del día específica
+    if rutina
+      //- ==================== RUTINA HEADER ====================
+      .card.glass-card.rutina-header-card.mb-4
+        .card-body.p-4
+          .row.align-items-center
+            .col-md-8
+              .d-flex.align-items-center.gap-3
+                .rutina-day-icon
+                  i.bi.bi-lightning-charge-fill
+                div
+                  h3.fw-bold.text-white.mb-1= rutina.nombre
+                  .d-flex.flex-wrap.gap-2.align-items-center
+                    span.badge.bg-gold.text-dark
+                      i.bi.bi-list-check.me-1
+                      if rutina.ejercicios && rutina.ejercicios.length > 0
+                        | #{rutina.ejercicios.length} ejercicios
+                      else
+                        | Rutina general
+                    span.badge.bg-dark-subtle
+                      i.bi.bi-clock.me-1
+                      | #{rutina.duracion_min} min
+                    span.badge.bg-dark-subtle
+                      i.bi.bi-person-badge.me-1
+                      | #{rutina.entrenador_nombre}
+            .col-md-4.text-md-end.mt-3.mt-md-0
+              .text-muted.small
+                i.bi.bi-calendar3.me-1
+                | Semana #{rutina.semana}
+
+      //- ==================== CALENTAMIENTO ====================
+      if rutina.calentamiento
+        .card.glass-card.warmup-card.mb-4
+          .card-body.p-4
+            .d-flex.align-items-center.gap-3.mb-3
+              .warmup-icon
+                i.bi.bi-fire
+              h5.fw-bold.text-white.mb-0
+                | 🔥 Calentamiento
+            .warmup-content
+              p.text-secondary.mb-0.fs-6= rutina.calentamiento
+
+      //- ==================== EJERCICIOS CARDS ====================
+      if rutina.ejercicios && rutina.ejercicios.length > 0
+        .row.g-4.mb-5
+          each ej, index in rutina.ejercicios
+            .col-md-6.col-lg-4
+              .ejercicio-card-visual(style=`animation-delay: ${index * 0.08}s`)
+                //- Media del ejercicio (imagen/GIF)
+                if ej.media
+                  .ejercicio-visual-media
+                    img(src=ej.media, alt=ej.nombre, loading='lazy', onerror="this.parentNode.innerHTML='<div class=\"ejercicio-visual-placeholder\"><i class=\"bi bi-image\"></i></div>'")
+                else
+                  .ejercicio-visual-placeholder
+                    i.bi.bi-image
+
+                //- Número badge
+                .ejercicio-visual-number #{index + 1}
+
+                //- Contenido
+                .ejercicio-visual-content
+                  h5.fw-bold.text-white.mb-2= ej.nombre
+
+                  //- Stats
+                  .ejercicio-visual-stats
+                    if ej.series
+                      .ejercicio-visual-stat
+                        .stat-val= ej.series
+                        .stat-lbl Series
+                    if ej.reps
+                      .ejercicio-visual-stat
+                        .stat-val= ej.reps
+                        .stat-lbl Reps
+                    if ej.descanso
+                      .ejercicio-visual-stat
+                        .stat-val= ej.descanso
+                        .stat-lbl Descanso
+
+                  //- Técnica
+                  if ej.tecnica
+                    .ejercicio-visual-tecnica
+                      i.bi.bi-lightbulb-fill.text-gold.me-1
+                      small.text-secondary= ej.tecnica
+
+      //- Fallback: si no hay ejercicios JSON, mostrar descripción clásica
+      else if rutina.descripcion
+        .card.glass-card.mb-5
+          .card-body.p-4
+            .d-flex.align-items-center.gap-2.mb-3
+              i.bi.bi-card-text.text-gold
+              h5.fw-bold.text-white.mb-0 Descripción
+            p.text-secondary.mb-0.lh-lg= rutina.descripcion
+
+      //- Botón Completar Rutina v5.7
+      .text-center.mt-4.mb-5
+        if entrenado
+          button.btn.btn-success.btn-lg.w-100(disabled)
+            i.bi.bi-check-circle-fill.me-2
+            |  ✓ Rutina Completada
+        else
+          button.btn.btn-success.btn-lg.w-100#btnCompletarRutina(onclick=`marcarCompletada('${rutina.dia_semana}', ${rutina.semana})`)
+            i.bi.bi-check-lg.me-2
+            |  Marcar Rutina como Completada
+
+        a.btn.btn-outline-warning.mt-3.w-100(href=`/cliente/rutinas/semana/${rutina.semana}`)
+          i.bi.bi-grid-fill.me-2
+          |  Ver Todos los Días
+
+    else
+      .card.border-0.shadow-sm.glass-card
+        .card-body.p-5.text-center
+          i.bi.bi-calendar-x.display-3.text-muted
+          h4.fw-bold.text-white.mt-3 No hay ejercicios para este día
+          p.text-muted Tu entrenador aún no ha asignado ejercicios específicos
+          if tipoMembresia === 'plus' || tipoMembresia === 'premium'
+            a.btn.btn-outline-gold.mt-3(href='/cliente/solicitar-rutina')
+              i.bi.bi-send-fill.me-2
+              | Solicitar Rutina Personalizada
+
+  block scripts
+    script.
+      function marcarCompletada(dia, semana) {
+        fetch('/cliente/rutinas/toggle-dia', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ dia: dia, semana: semana })
+        })
+        .then(response => response.json())
+        .then(data => {
+          if(data.ok) {
+            const btn = document.getElementById('btnCompletarRutina');
+            btn.innerHTML = '<i class="bi bi-check-circle-fill me-2"></i> ✓ Rutina Completada';
+            btn.disabled = true;
+            alert('¡Excelente trabajo! Rutina completada.');
+          } else {
+            alert('Error: ' + data.error);
+          }
+        })
+        .catch(error => console.error('Error:', error));
+      }

@@ -1,0 +1,55 @@
+extends ../layout
+
+block content
+  .container.py-4
+    h2.fw-bold.text-white.mb-4
+      i.bi.bi-cash-stack.text-gold.me-2
+      | Historial de Pagos
+
+    if pagos && pagos.length > 0
+      .card.border-0.shadow-sm.glass-card
+        .card-body.p-0
+          .table-responsive
+            table.table.table-dark-custom.mb-0
+              thead
+                tr
+                  th # 
+                  th Membresía
+                  th Monto
+                  th Método
+                  th Fecha
+                  th Estado
+              tbody
+                each pago, i in pagos
+                  tr
+                    td.text-muted= i + 1
+                    td= pago.membresia_nombre || 'N/A'
+                    td.text-gold.fw-semibold $#{parseFloat(pago.monto).toLocaleString('es-MX', {minimumFractionDigits: 2})}
+                    td
+                      if pago.metodo_pago === 'tarjeta'
+                        i.bi.bi-credit-card.me-1
+                      else if pago.metodo_pago === 'transferencia'
+                        i.bi.bi-bank.me-1
+                      else
+                        i.bi.bi-cash.me-1
+                      = pago.metodo_pago
+                    td= new Date(pago.fecha).toLocaleDateString('es-MX')
+                    td
+                      if pago.estado === 'pagado'
+                        span.badge.bg-success
+                          i.bi.bi-check-circle.me-1
+                          | Pagado
+                      else if pago.estado === 'pendiente'
+                        span.badge.bg-warning.text-dark
+                          i.bi.bi-clock.me-1
+                          | Pendiente
+                      else 
+                        span.badge.bg-danger
+                          i.bi.bi-x-circle.me-1
+                          | Cancelado
+    else
+      .card.border-0.shadow-sm.glass-card
+        .card-body.p-5.text-center
+          i.bi.bi-receipt.display-3.text-muted
+          h4.fw-bold.text-white.mt-3 No hay pagos registrados
+          p.text-muted Aún no tienes pagos en tu historial

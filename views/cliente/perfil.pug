@@ -1,0 +1,44 @@
+extends ../layout
+
+block content
+  .container.py-4
+    .row.justify-content-center
+      .col-lg-8
+        h2.fw-bold.text-white.mb-4
+          i.bi.bi-person-circle.text-gold.me-2
+          | Mi Perfil
+
+        .card.border-0.shadow-sm.glass-card
+          .card-body.p-4
+            .text-center.mb-4
+              .profile-avatar.mx-auto
+                i.bi.bi-person-fill.display-3.text-gold
+              h4.fw-bold.text-white.mt-3= usuario.nombre
+              span.badge.role-badge= usuario.rol
+
+            form(action='/cliente/perfil', method='POST')
+              .row.g-3
+                .col-md-6
+                  label.form-label.text-muted(for='nombre') Nombre completo
+                  input#nombre.form-control(type='text', name='nombre', value=usuario.nombre, required)
+                
+                .col-md-6
+                  label.form-label.text-muted(for='correo') Correo electrónico
+                  input#correo.form-control(type='email', name='correo', value=usuario.correo, required)
+                
+                .col-md-6
+                  label.form-label.text-muted(for='telefono') Teléfono
+                  input#telefono.form-control(type='tel', name='telefono', value=usuario.telefono || '')
+                
+                .col-md-6
+                  label.form-label.text-muted(for='password') Nueva contraseña
+                  input#password.form-control(type='password', name='password', placeholder='Dejar en blanco para no cambiar')
+
+                .col-12
+                  .d-flex.justify-content-between.align-items-center.mt-3
+                    .text-muted.small
+                      i.bi.bi-calendar.me-1
+                      | Miembro desde: #{new Date(usuario.fecha_registro).toLocaleDateString('es-MX')}
+                    button.btn.btn-gold.px-4(type='submit')
+                      i.bi.bi-check-lg.me-2
+                      | Guardar Cambios

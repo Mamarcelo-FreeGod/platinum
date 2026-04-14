@@ -1,0 +1,93 @@
+extends ../layout
+
+block content
+  .container.py-4
+    h2.fw-bold.text-white.mb-4
+      i.bi.bi-people-fill.text-gold.me-2
+      | Mis Clientes
+
+    //- Clientes Asignados
+    if misClientes && misClientes.length > 0
+      h5.fw-semibold.text-white.mb-3
+        i.bi.bi-star-fill.text-gold.me-2
+        | Clientes que entreno
+      .row.g-4.mb-5
+        each cliente in misClientes
+          .col-md-4
+            .card.border-0.shadow-sm.glass-card.h-100
+              .card-body.p-4
+                .d-flex.align-items-center.mb-3
+                  .profile-avatar-sm.me-3
+                    i.bi.bi-person-fill.fs-4.text-gold
+                  div
+                    h5.fw-bold.text-white.mb-0= cliente.nombre
+                    small.text-muted= cliente.correo
+
+                hr.border-secondary
+
+                .row.text-muted.small.mb-2
+                  .col-6
+                    i.bi.bi-telephone.me-1
+                    = cliente.telefono || 'Sin teléfono'
+                  .col-6.text-end
+                    i.bi.bi-calendar.me-1
+                    | Desde: #{new Date(cliente.fecha_asignacion).toLocaleDateString('es-MX')}
+
+                .d-flex.align-items-center.justify-content-between.mb-3
+                  if cliente.total_rutinas > 0
+                    span.badge.bg-success
+                      i.bi.bi-clipboard-check.me-1
+                      | #{cliente.total_rutinas} rutinas
+                  else
+                    span.badge.bg-secondary
+                      i.bi.bi-clipboard.me-1
+                      | Sin rutinas
+
+                .d-flex.gap-2
+                  a.btn.btn-sm.btn-outline-gold.flex-fill(href='/entrenador/rutinas/crear')
+                    i.bi.bi-plus-circle.me-1
+                    | Asignar Rutina
+                  a.btn.btn-sm.btn-outline-danger(href=`/entrenador/clientes/desasignar/${cliente.asignacion_id}`, title='Desasignar')
+                    i.bi.bi-person-dash
+    else
+      .card.border-0.shadow-sm.glass-card.mb-5
+        .card-body.p-4.text-center
+          i.bi.bi-people.display-4.text-muted
+          h5.fw-bold.text-white.mt-3 No tienes clientes asignados
+          p.text-muted Selecciona clientes de la lista de abajo
+
+    //- Todos los clientes disponibles
+    h5.fw-semibold.text-white.mb-3
+      i.bi.bi-person-plus.text-gold.me-2
+      | Clientes Disponibles para Asignar
+
+    if clientesDisponibles && clientesDisponibles.length > 0
+      .row.g-4
+        each cliente in clientesDisponibles
+          .col-md-4
+            .card.border-0.shadow-sm.glass-card.h-100
+              .card-body.p-4
+                .d-flex.align-items-center.mb-3
+                  .profile-avatar-sm.me-3
+                    i.bi.bi-person.fs-4.text-muted
+                  div
+                    h6.fw-bold.text-white.mb-0= cliente.nombre
+                    small.text-muted= cliente.correo
+
+                hr.border-secondary
+
+                .text-muted.small.mb-3
+                  i.bi.bi-telephone.me-1
+                  = cliente.telefono || 'Sin teléfono'
+
+                form(action='/entrenador/clientes/asignar', method='POST')
+                  input(type='hidden', name='cliente_id', value=cliente.id)
+                  button.btn.btn-gold.btn-sm.w-100(type='submit')
+                    i.bi.bi-person-plus-fill.me-1
+                    | Asignar Cliente
+    else
+      .card.border-0.shadow-sm.glass-card
+        .card-body.p-4.text-center
+          i.bi.bi-check-circle.display-4.text-success
+          h5.fw-bold.text-white.mt-3 Todos los clientes están asignados
+          p.text-muted No hay más clientes disponibles para asignar

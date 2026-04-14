@@ -1,0 +1,134 @@
+extends ../layout
+
+block content
+  .container.py-4
+    h2.fw-bold.text-white.mb-4
+      i.bi.bi-graph-up.text-gold.me-2
+      | Reportes
+
+    //- Stats summary
+    .row.g-4.mb-4
+      .col-md-3
+        .card.stat-card.h-100.border-0
+          .card-body.text-center
+            h6.text-muted.mb-1 Total Clientes
+            h3.fw-bold.text-gold= totalClientes
+      .col-md-3
+        .card.stat-card.h-100.border-0
+          .card-body.text-center
+            h6.text-muted.mb-1 Entrenadores
+            h3.fw-bold.text-gold= totalEntrenadores
+      .col-md-3
+        .card.stat-card.h-100.border-0
+          .card-body.text-center
+            h6.text-muted.mb-1 Membresías Activas
+            h3.fw-bold.text-gold= membresiasActivas
+      .col-md-3
+        .card.stat-card.h-100.border-0
+          .card-body.text-center
+            h6.text-muted.mb-1 Ingresos del Mes
+            h3.fw-bold.text-gold $#{parseFloat(ingresosMes).toLocaleString('es-MX', {minimumFractionDigits: 2})}
+
+    //- Revenue card
+    .card.border-0.shadow-sm.glass-card.mb-4
+      .card-body.p-4
+        h5.fw-bold.text-white.mb-3
+          i.bi.bi-cash-coin.text-gold.me-2
+          | Resumen de Ingresos
+        .row
+          .col-md-6
+            .p-3.rounded.bg-dark-subtle
+              .text-muted.small Ingresos Totales
+              h2.fw-bold.text-gold.mb-0 $#{parseFloat(totalIngresos).toLocaleString('es-MX', {minimumFractionDigits: 2})}
+          .col-md-6
+            .p-3.rounded.bg-dark-subtle
+              .text-muted.small Ingresos este Mes
+              h2.fw-bold.text-success.mb-0 $#{parseFloat(ingresosMes).toLocaleString('es-MX', {minimumFractionDigits: 2})}
+
+    //- Pagos por método
+    .card.border-0.shadow-sm.glass-card.mb-4
+      .card-header.border-0
+        h5.mb-0.text-white
+          i.bi.bi-credit-card.text-gold.me-2
+          | Pagos por Método
+      .card-body
+        if ingresosPorMetodo && ingresosPorMetodo.length > 0
+          .row.g-3
+            each metodo in ingresosPorMetodo
+              .col-md-4
+                .p-3.rounded.bg-dark-subtle.text-center
+                  if metodo.metodo_pago === 'efectivo'
+                    i.bi.bi-cash.display-6.text-success
+                  else if metodo.metodo_pago === 'transferencia'
+                    i.bi.bi-bank.display-6.text-info
+                  else
+                    i.bi.bi-credit-card.display-6.text-warning
+                  h5.fw-bold.text-white.mt-2.text-capitalize= metodo.metodo_pago
+                  h4.text-gold.fw-bold $#{parseFloat(metodo.total).toLocaleString('es-MX', {minimumFractionDigits: 2})}
+                  .text-muted.small #{metodo.cantidad} pagos
+        else
+          p.text-muted.text-center No hay datos de pagos
+
+    //- Ingresos mensuales
+    if ingresosMensuales && ingresosMensuales.length > 0
+      .card.border-0.shadow-sm.glass-card.mb-4
+        .card-header.border-0
+          h5.mb-0.text-white
+            i.bi.bi-calendar3.text-gold.me-2
+            | Ingresos Mensuales
+        .card-body.p-0
+          .table-responsive
+            table.table.table-dark-custom.mb-0
+              thead
+                tr
+                  th Mes
+                  th Pagos
+                  th Total
+              tbody
+                each mes in ingresosMensuales
+                  tr
+                    td.fw-semibold= mes.mes_nombre
+                    td= mes.cantidad
+                    td.text-gold.fw-bold $#{parseFloat(mes.total).toLocaleString('es-MX', {minimumFractionDigits: 2})}
+
+    //- Historial de pagos
+    .card.border-0.shadow-sm.glass-card
+      .card-header.border-0
+        h5.mb-0.text-white
+          i.bi.bi-clock-history.text-gold.me-2
+          | Historial de Pagos
+      .card-body.p-0
+        .table-responsive
+          table.table.table-dark-custom.mb-0
+            thead
+              tr
+                th Cliente
+                th Membresía
+                th Monto
+                th Método
+                th Fecha
+                th Estado
+            tbody
+              if pagos && pagos.length > 0
+                each pago in pagos
+                  tr
+                    td.fw-semibold= pago.usuario_nombre
+                    td= pago.membresia_nombre || 'N/A'
+                    td.text-gold.fw-semibold $#{parseFloat(pago.monto).toLocaleString('es-MX', {minimumFractionDigits: 2})}
+                    td
+                      if pago.metodo_pago === 'transferencia'
+                        i.bi.bi-bank.me-1
+                      else
+                        i.bi.bi-cash.me-1
+                      = pago.metodo_pago
+                    td= new Date(pago.fecha).toLocaleDateString('es-MX')
+                    td
+                      if pago.estado === 'pagado'
+                        span.badge.bg-success Pagado
+                      else if pago.estado === 'pendiente'
+                        span.badge.bg-warning.text-dark Pendiente
+                      else
+                        span.badge.bg-danger Cancelado
+              else
+                tr
+                  td.text-center.text-muted.py-4(colspan='6') No hay pagos registrados

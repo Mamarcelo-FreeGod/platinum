@@ -1,0 +1,39 @@
+extends ../layout
+
+block content
+  .container.py-4
+    .d-flex.justify-content-between.align-items-center.mb-4
+      h2.fw-bold.text-white.mb-0
+        i.bi.bi-person-badge.text-gold.me-2
+        | Equipo de Entrenadores
+
+    if entrenadores && entrenadores.length > 0
+      .row.g-4
+        each entrenador in entrenadores
+          .col-md-4
+            .card.border-0.shadow-sm.glass-card.h-100
+              .card-body.p-4.text-center
+                .profile-avatar.mx-auto.mb-3
+                  i.bi.bi-person-fill.display-5.text-gold
+                h5.fw-bold.text-white= entrenador.nombre
+                p.text-muted.mb-1= entrenador.correo
+                p.text-muted.small
+                  i.bi.bi-telephone.me-1
+                  = entrenador.telefono || 'Sin teléfono'
+                .mt-3
+                  if entrenador.activo
+                    span.badge.bg-success
+                      i.bi.bi-check-circle.me-1
+                      | Activo
+                  else
+                    span.badge.bg-secondary
+                      i.bi.bi-x-circle.me-1
+                      | Inactivo
+    else
+      .card.border-0.shadow-sm.glass-card
+        .card-body.p-5.text-center
+          i.bi.bi-person-badge.display-3.text-muted
+          h4.fw-bold.text-white.mt-3 No hay entrenadores registrados
+          p.text-muted
+            | Puedes agregar entrenadores desde la  
+            a.text-gold(href='/admin/usuarios/crear') sección de usuarios

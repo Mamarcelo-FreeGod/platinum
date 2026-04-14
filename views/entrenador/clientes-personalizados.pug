@@ -1,0 +1,65 @@
+extends ../layout
+
+block content
+  .container.py-4
+    //- Header
+    .d-flex.justify-content-between.align-items-center.mb-4
+      div
+        h1.display-6.fw-bold
+          i.bi.bi-people-fill.me-2.text-gold
+          | Clientes Personalizados
+        p.text-secondary.mb-0 Clientes con solicitudes aceptadas, listos para recibir rutinas
+      a.btn.btn-outline-gold(href='/entrenador/solicitudes-rutina')
+        i.bi.bi-clipboard2-pulse.me-1
+        | Ver Solicitudes
+
+    if clientes && clientes.length > 0
+      .row.g-4
+        each cli in clientes
+          .col-md-6.col-lg-4
+            .card.glass-card.h-100
+              .card-body.p-4
+                .d-flex.align-items-center.mb-3
+                  .profile-avatar-sm.me-3
+                    i.bi.bi-person-check-fill.text-gold.fs-5
+                  div
+                    h5.fw-bold.mb-0.text-light= cli.cliente_nombre
+                    small.text-muted= cli.cliente_correo
+
+                .row.g-2.mb-3
+                  .col-6
+                    .p-2.rounded-3.text-center(style='background: rgba(250, 204, 21, 0.08)')
+                      small.text-muted.d-block Peso
+                      span.fw-bold.text-light #{cli.peso} kg
+                  .col-6
+                    .p-2.rounded-3.text-center(style='background: rgba(59, 130, 246, 0.08)')
+                      small.text-muted.d-block Estatura
+                      span.fw-bold.text-light #{cli.estatura} cm
+                  .col-6
+                    .p-2.rounded-3.text-center(style='background: rgba(34, 197, 94, 0.08)')
+                      small.text-muted.d-block Sexo
+                      span.fw-bold.text-light= cli.sexo
+                  .col-6
+                    .p-2.rounded-3.text-center(style='background: rgba(139, 92, 246, 0.08)')
+                      small.text-muted.d-block Estado
+                      span.badge.bg-success Aceptada
+
+                if cli.condicion
+                  .mb-3
+                    small.text-muted.d-block.mb-1
+                      i.bi.bi-clipboard2-pulse.me-1
+                      | Condición / Objetivos:
+                    p.small.text-secondary.mb-0= cli.condicion
+
+              .card-footer
+                a.btn.btn-gold.btn-sm.w-100(href=`/entrenador/rutina-personalizada/crear/${cli.id}`)
+                  i.bi.bi-plus-circle.me-1
+                  | Crear Rutina
+    else
+      .text-center.py-5
+        i.bi.bi-person-x.text-muted(style='font-size: 4rem')
+        h4.text-secondary.mt-3 No hay clientes personalizados
+        p.text-muted Acepta solicitudes de rutina para ver clientes aquí.
+        a.btn.btn-outline-gold.mt-2(href='/entrenador/solicitudes-rutina')
+          i.bi.bi-clipboard2-pulse.me-1
+          | Ver Solicitudes Pendientes

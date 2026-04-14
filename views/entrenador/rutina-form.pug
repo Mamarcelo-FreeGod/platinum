@@ -1,0 +1,217 @@
+extends ../layout
+
+block content
+  .container.py-4
+    .d-flex.align-items-center.mb-4
+      a.btn.btn-outline-gold.me-3(href='/entrenador/rutinas')
+        i.bi.bi-arrow-left
+      div
+        h1.display-6.fw-bold
+          i.bi.bi-clipboard-plus.me-2.text-gold
+          | Nueva Rutina General
+        p.text-secondary.mb-0 Diseña rápidamente rutinas idénticas para múltiples días y semanas
+
+    .row.g-4
+      .col-lg-12
+        form(action='/entrenador/rutinas/crear', method='POST', enctype='multipart/form-data', id='rutinaForm')
+          input(type='hidden', name='ejercicios', id='ejerciciosInput')
+          
+          .card.glass-card.mb-4
+            .card-header
+              h6.mb-0.fw-bold.text-light
+                i.bi.bi-gear.me-2.text-gold
+                | Configuración General
+            .card-body.p-4
+              .row.g-3
+                .col-md-4
+                  label.form-label.text-muted Cliente *
+                  select.form-select(name='cliente_id', required)
+                    option(value='', disabled, selected) Selecciona un cliente
+                    each cliente in clientes
+                      option(value=cliente.id)= cliente.nombre
+
+                .col-md-4
+                  label.form-label.text-muted Nombre de la Rutina *
+                  input.form-control(type='text', name='nombre', placeholder='Ej: Rutina de Fuerza G1', required)
+
+                .col-md-4
+                  label.form-label.text-muted
+                    i.bi.bi-clock.me-1.text-gold
+                    | Duración por sesión (min)
+                  input.form-control(type='number', name='duracion_min', value='60', min='15', max='180')
+
+                .col-12
+                  label.form-label.text-muted Semana(s) de Entrenamiento a asignar
+                  .d-flex.flex-wrap.gap-3.mt-2
+                    each val in [1, 2, 3, 4]
+                      .form-check
+                        input.form-check-input(type='checkbox', name='semanas[]', value=val, id=`semana${val}`)
+                        label.form-check-label.text-white(for=`semana${val}`) Sem #{val}
+
+                .col-12
+                  label.form-label.text-muted 🔥 Calentamiento
+                  input.form-control(type='text', name='calentamiento', placeholder='Ej: 5-10 min cardio + movilidad')
+
+          //- Day Selector
+          .card.glass-card.mb-4
+            .card-header
+              h6.mb-0.fw-bold.text-light
+                i.bi.bi-calendar3.me-2.text-gold
+                | Selecciona los Días de Entrenamiento
+            .card-body.p-4
+              .dia-selector-grid
+                each diaLabel, idx in ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo']
+                  - var diaColors = ['#3b82f6', '#8b5cf6', '#f59e0b', '#22c55e', '#ef4444', '#06b6d4', '#ec4899']
+                  .dia-toggle-btn.cursor-pointer(data-dia=diaLabel, onclick=`toggleDia('${diaLabel}')`, style=`--dia-color: ${diaColors[idx]}; cursor: pointer;`)
+                    .dia-toggle-check
+                      i.bi.bi-check-lg
+                    span.dia-toggle-label= diaLabel
+              #diasHiddenInputs
+
+          //- Ejercicios
+          .card.glass-card.mb-4
+            .card-header.d-flex.justify-content-between.align-items-center
+              h6.mb-0.fw-bold.text-light
+                i.bi.bi-list-ol.me-2.text-gold
+                | Bloque Único de Ejercicios
+                span.badge.bg-gold.text-dark.ms-2#ejerciciosCount 0
+              button.btn.btn-sm.btn-gold(type='button', onclick='agregarEjercicio()')
+                i.bi.bi-plus-circle.me-1
+                | Agregar Ejercicio
+            .card-body.p-4
+              #ejerciciosContainer
+                .text-center.text-muted.py-4#ejerciciosEmpty
+                  i.bi.bi-clipboard-plus.display-4.d-block.mb-3(style='opacity:0.3')
+                  p Haz clic en "Agregar Ejercicio" para armar el bloque que se clonará
+
+          .text-end.mt-4
+            button.btn.btn-gold.btn-lg.px-5(type='submit')
+              i.bi.bi-check-circle-fill.me-2
+              | Generar Rutinas Masivamente
+
+  //- Template de Ejercicio
+  template#ejercicioTemplate
+    .ejercicio-block.glass-card.mb-3.p-4
+      .d-flex.justify-content-between.align-items-center.mb-3
+        .d-flex.align-items-center.gap-2
+          span.badge.bg-gold.text-dark.fs-6.ejercicio-badge #
+          h6.fw-bold.text-white.mb-0 Ejercicio
+        button.btn.btn-sm.btn-outline-danger(type='button', onclick='eliminarEjercicio(this)')
+          i.bi.bi-trash.me-1
+          | Eliminar
+      .row.g-3
+        .col-md-6
+          label.form-label.text-muted Nombre del ejercicio *
+          input.form-control.ej-nombre(type='text', placeholder='Ej: Press Plano con Barra', required)
+        .col-md-3
+          label.form-label.text-muted Series
+          select.form-select.ej-series
+            option(value='3') 3
+            option(value='4') 4
+            option(value='5') 5
+        .col-md-3
+          label.form-label.text-muted Repeticiones
+          select.form-select.ej-reps
+            option(value='6-8') 6-8
+            option(value='8-10') 8-10
+            option(value='8-12') 8-12
+            option(value='10-12') 10-12
+            option(value='12-15') 12-15
+        .col-md-4
+          label.form-label.text-muted Descanso
+          select.form-select.ej-descanso
+            option(value='30-45s') 30-45 segundos
+            option(value='45-60s') 45-60 segundos
+            option(value='1-2min') 1-2 minutos
+            option(value='2-3min') 2-3 minutos
+        .col-md-8
+          label.form-label.text-muted Técnica / Notas
+          textarea.form-control.ej-tecnica(rows='2', placeholder='Instrucciones de técnica para el cliente...')
+        .col-12
+          label.form-label.text-muted
+            i.bi.bi-image.me-1.text-gold
+            | Imagen / GIF del ejercicio
+          input.form-control.ej-media(type='file', name='media_ejercicio', accept='image/*,image/gif')
+
+  //- Scripts
+  script.
+    function toggleDia(dia) {
+      var btn = document.querySelector('.dia-toggle-btn[data-dia="' + dia + '"]');
+      var hiddenInputsDiv = document.getElementById('diasHiddenInputs');
+      btn.classList.toggle('active');
+      
+      if(btn.classList.contains('active')) {
+          var input = document.createElement('input');
+          input.type = 'hidden';
+          input.name = 'dias[]';
+          input.value = dia;
+          input.id = 'hidden_dia_' + dia;
+          hiddenInputsDiv.appendChild(input);
+      } else {
+          var input = document.getElementById('hidden_dia_' + dia);
+          if(input) input.remove();
+      }
+    }
+
+    function agregarEjercicio() {
+      var template = document.getElementById('ejercicioTemplate');
+      var container = document.getElementById('ejerciciosContainer');
+      var empty = document.getElementById('ejerciciosEmpty');
+      if (empty) empty.style.display = 'none';
+
+      var clone = template.content.cloneNode(true);
+      container.appendChild(clone);
+      actualizarConteo();
+    }
+
+    function eliminarEjercicio(btn) {
+      btn.closest('.ejercicio-block').remove();
+      actualizarConteo();
+      var blocks = document.querySelectorAll('.ejercicio-block');
+      if (blocks.length === 0) {
+        var empty = document.getElementById('ejerciciosEmpty');
+        if (empty) empty.style.display = 'block';
+      }
+    }
+
+    function actualizarConteo() {
+      var blocks = document.querySelectorAll('.ejercicio-block');
+      document.getElementById('ejerciciosCount').textContent = blocks.length;
+      blocks.forEach(function(b, i) {
+        var badge = b.querySelector('.ejercicio-badge');
+        if (badge) badge.textContent = '#' + (i + 1);
+      });
+    }
+
+    document.getElementById('rutinaForm').addEventListener('submit', function(e) {
+      // Validate Semanas and Dias
+      var semanasList = document.querySelectorAll('input[name="semanas[]"]:checked');
+      var diasList = document.querySelectorAll('input[name="dias[]"]');
+      
+      if (semanasList.length === 0) {
+        e.preventDefault();
+        alert('Debes seleccionar al menos una semana.');
+        return;
+      }
+      if (diasList.length === 0) {
+        e.preventDefault();
+        alert('Debes seleccionar al menos un día.');
+        return;
+      }
+
+      var blocks = document.querySelectorAll('.ejercicio-block');
+      var ejercicios = [];
+      blocks.forEach(function(block) {
+        var nom = block.querySelector('.ej-nombre').value.trim();
+        if (nom) {
+          ejercicios.push({
+            nombre: nom,
+            series: block.querySelector('.ej-series').value,
+            reps: block.querySelector('.ej-reps').value,
+            descanso: block.querySelector('.ej-descanso').value,
+            tecnica: block.querySelector('.ej-tecnica').value.trim()
+          });
+        }
+      });
+      document.getElementById('ejerciciosInput').value = JSON.stringify(ejercicios);
+    });

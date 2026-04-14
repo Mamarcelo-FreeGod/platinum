@@ -1,0 +1,100 @@
+extends ../layout
+
+block content
+  .container.py-4
+    //- Welcome header
+    .welcome-banner.mb-4
+      .row.align-items-center
+        .col-md-8
+          h1.fw-bold.text-white
+            | Panel de 
+            span.text-gold Administración
+          p.text-light.mb-0.opacity-75 Gestiona tu gimnasio de forma eficiente
+        .col-md-4.text-md-end
+          .badge.role-badge-admin.fs-6
+            i.bi.bi-shield-fill.me-1
+            | Administrador
+
+    //- Stats Cards
+    .row.g-4.mb-4
+      .col-md-4.col-lg-2
+        .card.stat-card.h-100.border-0
+          .card-body.text-center
+            .stat-icon.bg-gold-soft.mx-auto.mb-2
+              i.bi.bi-people-fill.text-gold.fs-4
+            h3.fw-bold.text-white.mb-0= totalClientes
+            .text-muted.small Clientes
+
+      .col-md-4.col-lg-2
+        .card.stat-card.h-100.border-0
+          .card-body.text-center
+            .stat-icon.bg-success-soft.mx-auto.mb-2
+              i.bi.bi-person-badge.text-success.fs-4
+            h3.fw-bold.text-white.mb-0= totalEntrenadores
+            .text-muted.small Entrenadores
+
+      .col-md-4.col-lg-2
+        .card.stat-card.h-100.border-0
+          .card-body.text-center
+            .stat-icon.bg-info-soft.mx-auto.mb-2
+              i.bi.bi-card-checklist.text-info.fs-4
+            h3.fw-bold.text-white.mb-0= membresiasActivas
+            .text-muted.small Membresías Act.
+
+      .col-md-4.col-lg-2
+        .card.stat-card.h-100.border-0
+          .card-body.text-center
+            .stat-icon.bg-warning-soft.mx-auto.mb-2
+              i.bi.bi-graph-up-arrow.text-warning.fs-4
+            h3.fw-bold.text-white.mb-0 $#{parseFloat(ingresosMes).toLocaleString('es-MX', {minimumFractionDigits: 0})}
+            .text-muted.small Ingresos Mes
+
+      .col-md-4.col-lg-2
+        .card.stat-card.h-100.border-0
+          .card-body.text-center
+            .stat-icon.bg-gold-soft.mx-auto.mb-2
+              i.bi.bi-cash-coin.text-gold.fs-4
+            h3.fw-bold.text-white.mb-0 $#{parseFloat(totalIngresos).toLocaleString('es-MX', {minimumFractionDigits: 0})}
+            .text-muted.small Ingresos Total
+
+      .col-md-4.col-lg-2
+        .card.stat-card.h-100.border-0
+          .card-body.text-center
+            .stat-icon.bg-danger-soft.mx-auto.mb-2
+              i.bi.bi-envelope-exclamation.text-danger.fs-4
+            h3.fw-bold.text-white.mb-0= solicitudesPendientes
+            .text-muted.small Solicitudes Pend.
+
+    //- Quick Actions
+    .row.g-4
+      .col-md-3
+        a.text-decoration-none(href='/admin/usuarios')
+          .card.quick-link-card.h-100.border-0.text-center
+            .card-body.py-4
+              i.bi.bi-people-fill.display-5.text-gold
+              h6.fw-semibold.mt-3.text-white Gestionar Usuarios
+              p.text-muted.small.mb-0 CRUD completo
+
+      .col-md-3
+        a.text-decoration-none(href='/admin/membresias')
+          .card.quick-link-card.h-100.border-0.text-center
+            .card-body.py-4
+              i.bi.bi-card-checklist.display-5.text-gold
+              h6.fw-semibold.mt-3.text-white Membresías
+              p.text-muted.small.mb-0 Planes y precios
+
+      .col-md-3
+        a.text-decoration-none(href='/admin/entrenadores/crear')
+          .card.quick-link-card.h-100.border-0.text-center
+            .card-body.py-4
+              i.bi.bi-person-plus-fill.display-5.text-gold
+              h6.fw-semibold.mt-3.text-white Crear Entrenador
+              p.text-muted.small.mb-0 Registrar nuevo
+
+      .col-md-3
+        a.text-decoration-none(href='/admin/solicitudes')
+          .card.quick-link-card.h-100.border-0.text-center
+            .card-body.py-4
+              i.bi.bi-envelope-fill.display-5.text-gold
+              h6.fw-semibold.mt-3.text-white Solicitudes
+              p.text-muted.small.mb-0 Membresías pendientes

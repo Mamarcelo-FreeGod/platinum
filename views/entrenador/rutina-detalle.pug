@@ -1,0 +1,45 @@
+extends ../layout
+
+block content
+  .container.mt-4
+    .d-flex.justify-content-between.align-items-center.mb-4
+      a.btn.btn-outline-warning(href="javascript:history.back()") 
+        i.bi.bi-arrow-left
+        |  Volver a Rutinas
+      a.btn.btn-primary(href=`/entrenador/rutinas/editar/${rutina.id}`)
+        i.bi.bi-pencil-square
+        |  Editar Rutina
+    
+    .card.bg-dark.border-warning.shadow-lg
+      .card-header.bg-warning.text-dark
+        h3.mb-0.fw-bold #{rutina.dia_semana} - #{rutina.nombre}
+      .card-body.text-white
+        p.text-muted Semana: #{rutina.semana}
+        if rutina.calentamiento
+          p.fw-bold.text-warning 🔥 Calentamiento:
+          p.text-light= rutina.calentamiento
+        hr.bg-secondary
+        // Renderizar ejercicios JSON de forma bonita
+        if rutina.ejercicios
+          - const ejercicios = typeof rutina.ejercicios === 'string' ? JSON.parse(rutina.ejercicios) : rutina.ejercicios
+          .row
+            each ej, index in ejercicios
+              .col-md-6.mb-3
+                .card.bg-secondary.border-0.h-100
+                  .card-body
+                    if ej.gif && ej.gif.trim() !== ''
+                      img.img-fluid.rounded.mb-3.w-100(src=ej.gif alt=ej.nombre style="height: 150px; object-fit: cover;")
+                    h5.text-warning.fw-bold #{index + 1}. #{ej.nombre}
+                    p.mb-1 
+                      i.bi.bi-arrow-repeat.text-muted
+                      |  Series: #{ej.series} | Reps: #{ej.reps || ej.repeticiones}
+                    p.mb-2 
+                      i.bi.bi-stopwatch.text-muted
+                      |  Descanso: #{ej.descanso}
+                    if ej.tecnica && ej.tecnica.trim() !== ''
+                      .p-2.bg-dark.rounded
+                        p.mb-0.small.text-info 
+                          i.bi.bi-lightbulb
+                          |  Técnica: #{ej.tecnica}
+        else
+          p No hay ejercicios detallados.

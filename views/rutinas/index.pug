@@ -1,0 +1,83 @@
+extends ../layout
+
+block content
+  style.
+    .cat-card-bg {
+      position: relative;
+      border-radius: 20px;
+      overflow: hidden;
+      min-height: 250px;
+      cursor: pointer;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .cat-card-bg .bg-image {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-size: cover;
+      background-position: center;
+      transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      z-index: 1;
+    }
+    .cat-card-bg .overlay {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.6) 50%, rgba(0,0,0,0.4) 100%);
+      z-index: 2;
+      transition: background 0.4s ease;
+    }
+    .cat-card-bg .content {
+      position: relative;
+      z-index: 3;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 1.5rem;
+    }
+    .cat-card-bg:hover .bg-image {
+      transform: scale(1.1);
+    }
+    .cat-card-bg:hover .overlay {
+      background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.5) 50%, rgba(212, 175, 55, 0.2) 100%);
+    }
+
+  .container.py-4
+    //- Header
+    .text-center.mb-5
+      h1.display-5.fw-bold
+        i.bi.bi-clipboard-check.me-3.text-gold
+        | Rutinas de Entrenamiento
+      p.text-secondary.fs-5.mt-2 Elige un grupo muscular y descubre ejercicios clave
+      
+    //- Categorías Grid
+    .row.g-4.mb-5
+      each cat in categorias
+        .col-md-6.col-lg-6
+          a.text-decoration-none(href=`/rutinas/${cat.key}`)
+            .cat-card-bg.glass-card.h-100
+              .bg-image(style=`background-image: url('${cat.bgImage}');`)
+              .overlay
+              .content
+                h3.fw-bold.text-white.mb-2(style='letter-spacing: 1px;')
+                  i(class=`bi ${cat.icono} me-2`, style=`color: ${cat.color}`)
+                  | #{cat.titulo}
+                p.text-light.opacity-75.mb-3= cat.descripcion
+                .mt-auto
+                  span.text-gold.fw-bold
+                    | Ver rutina completa
+                    i.bi.bi-arrow-right.ms-2
+
+    //- Separador
+    hr.border-secondary.my-4
+    
+    //- Botón Rutina Personalizada
+    if user && user.rol === 'cliente'
+      .text-center.py-4
+        .glass-card.d-inline-block.p-5.text-center(style='max-width: 600px')
+          .mb-3
+            i.bi.bi-person-gear.text-gold(style='font-size: 3.5rem')
+          h3.fw-bold.text-light ¿Necesitas algo más específico?
+          p.text-secondary.mb-4 Solicita una rutina personalizada diseñada por nuestros entrenadores profesionales según tus objetivos si tu membresía lo permite.
+          a.btn.btn-gold.btn-lg.px-5.py-3(href='/cliente/solicitar-rutina')
+            i.bi.bi-send-fill.me-2
+            | Solicitar Rutina Personalizada

@@ -1,0 +1,45 @@
+extends ../layout
+
+block content
+  .container.py-4
+    .d-flex.justify-content-between.align-items-center.mb-4
+      h2.fw-bold.text-white.mb-0
+        i.bi.bi-bell-fill.text-gold.me-2
+        | Mis Notificaciones
+      if notificaciones && notificaciones.length > 0
+        a.btn.btn-outline-gold(href='/notificaciones/leer-todas')
+          i.bi.bi-check-all.me-1
+          | Marcar todas como leídas
+
+    if notificaciones && notificaciones.length > 0
+      .row.g-3
+        each notif in notificaciones
+          .col-12
+            .card.border-0.shadow-sm.notif-card(class=notif.leido ? 'glass-card opacity-75' : 'glass-card notif-unread')
+              .card-body.p-4
+                .d-flex.align-items-start.justify-content-between
+                  .d-flex.align-items-start
+                    .notif-icon.me-3
+                      if notif.leido
+                        i.bi.bi-bell.fs-4.text-muted
+                      else
+                        i.bi.bi-bell-fill.fs-4.text-gold
+                    div
+                      p.mb-1.text-white= notif.mensaje
+                      .d-flex.align-items-center.gap-3
+                        small.text-muted
+                          i.bi.bi-clock.me-1
+                          = new Date(notif.fecha).toLocaleDateString('es-MX', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+                        if !notif.leido
+                          span.badge.bg-gold.text-dark
+                            i.bi.bi-circle-fill.me-1(style='font-size: 0.5rem')
+                            | Nueva
+                  if !notif.leido
+                    a.btn.btn-sm.btn-outline-gold(href=`/notificaciones/leida/${notif.id}`, title='Marcar como leída')
+                      i.bi.bi-check2
+    else
+      .card.border-0.shadow-sm.glass-card
+        .card-body.p-5.text-center
+          i.bi.bi-bell-slash.display-3.text-muted
+          h4.fw-bold.text-white.mt-3 No tienes notificaciones
+          p.text-muted Las notificaciones aparecerán aquí cuando haya actividad

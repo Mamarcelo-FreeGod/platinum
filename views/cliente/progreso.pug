@@ -1,0 +1,279 @@
+extends ../layout
+
+block content
+  script(src="https://cdn.jsdelivr.net/npm/chart.js")
+
+  .container.py-4
+    //- Flash messages
+    if mensaje
+      .alert.alert-warning.alert-dismissible.fade.show.mb-4(role='alert')
+        i.bi.bi-exclamation-triangle-fill.me-2
+        strong #{mensaje}
+        button.btn-close(type='button', data-bs-dismiss='alert', aria-label='Cerrar')
+
+    //- Header
+    .d-flex.justify-content-between.align-items-center.mb-4
+      div
+        h1.display-6.fw-bold
+          i.bi.bi-graph-up-arrow.me-2.text-gold
+          | Mi Progreso
+        p.text-secondary.mb-0 Sigue tu evolución y alcanza tus metas.
+
+    //- BLOQUEO: Sin rutina aceptada
+    if sinRutina
+      .card.glass-card.mb-4
+        .card-body.p-5.text-center
+          .mb-4
+            .rounded-circle.bg-dark.p-4.d-inline-flex.align-items-center.justify-content-center(style='width: 100px; height: 100px; border: 2px solid rgba(245, 158, 11, 0.3)')
+              i.bi.bi-lock-fill.text-warning.display-5
+          h3.text-white.fw-bold.mb-2 Aún no tienes una rutina activa
+          p.text-secondary.mb-4 Tu entrenador debe aceptar tu solicitud de rutina para desbloquear el módulo de progreso.
+          .d-flex.justify-content-center.gap-3.flex-wrap
+            a.btn.btn-gold(href='/cliente/solicitar-rutina')
+              i.bi.bi-send-fill.me-2
+              | Solicitar Rutina
+            a.btn.btn-outline-gold(href='/cliente/dashboard')
+              i.bi.bi-house.me-2
+              | Volver al Dashboard
+
+    //- CONTENIDO PRINCIPAL (solo si tiene rutina aceptada)
+    if !sinRutina
+      .row.g-4
+        //- COLUMNA IZQUIERDA: PANEL + GRÁFICAS
+        .col-lg-8
+
+          //- PANEL INTELIGENTE (COMPOSICIÓN CORPORAL)
+          .card.glass-card.mb-4.border-gold
+            .card-body.p-4
+              if composicion
+                .d-flex.align-items-center.mb-4
+                  .rounded-circle.bg-dark.p-3.me-3.border.border-secondary
+                    i.bi.bi-activity.text-gold.fs-2
+                  div
+                    h3.fw-bold.mb-0 Panel Inteligente
+                    p.text-secondary.mb-0 Composición Corporal
+
+                //- Cards de datos corporales
+                .row.g-3.mb-4
+                  .col-6.col-md-4
+                    .p-3.bg-dark-subtle.rounded-3.text-center.h-100
+                      .d-flex.align-items-center.justify-content-center.mb-2
+                        i.bi.bi-speedometer2.text-gold.fs-5.me-2
+                        h6.text-muted.mb-0 Peso Actual
+                      h3.text-white.mb-0 #{composicion.pesoActual} 
+                        small.fs-6.text-muted kg
+                  .col-6.col-md-4
+                    .p-3.bg-dark-subtle.rounded-3.text-center.h-100
+                      .d-flex.align-items-center.justify-content-center.mb-2
+                        i.bi.bi-rulers.text-gold.fs-5.me-2
+                        h6.text-muted.mb-0 Estatura
+                      h3.text-white.mb-0 #{composicion.estaturaInt} 
+                        small.fs-6.text-muted cm
+                  .col-6.col-md-4
+                    .p-3.bg-dark-subtle.rounded-3.text-center.h-100
+                      .d-flex.align-items-center.justify-content-center.mb-2
+                        i.bi.bi-heart-pulse.text-gold.fs-5.me-2
+                        h6.text-muted.mb-0 I.M.C
+                      h3.mb-0(class=(composicion.imc >= 25 ? 'text-warning' : (composicion.imc < 18.5 ? 'text-info' : 'text-success'))) #{composicion.imc}
+                  .col-6.col-md-6
+                    .p-3.bg-dark-subtle.rounded-3.text-center.h-100
+                      .d-flex.align-items-center.justify-content-center.mb-2
+                        i.bi.bi-shield-check.text-gold.fs-5.me-2
+                        h6.text-muted.mb-0 Clasificación
+                      h4.text-gold.mb-0.fw-bold #{composicion.clasificacion}
+                  .col-12.col-md-6
+                    .p-3.bg-dark-subtle.rounded-3.h-100
+                      .d-flex.align-items-center.mb-2
+                        i.bi.bi-droplet-half.text-gold.fs-5.me-2
+                        h6.text-muted.mb-0 % Grasa Corporal
+                      .d-flex.align-items-center.gap-3
+                        .progress.flex-grow-1(style="height: 14px; background-color: #2a2a2a;")
+                          .progress-bar.bg-gold.progress-bar-striped.progress-bar-animated(role="progressbar", style=`width: ${Math.min(composicion.grasa, 100)}%`, aria-valuenow=composicion.grasa, aria-valuemin="0", aria-valuemax="100")
+                        span.text-gold.fw-bold.fs-5 #{composicion.grasa}%
+
+                //- Recomendación
+                if composicion.objetivo
+                  .alert.alert-dark.alert-persistent.border-start.border-4.border-gold.d-flex.align-items-center(role='alert')
+                    i.bi.bi-lightbulb-fill.text-warning.fs-3.me-3.flex-shrink-0
+                    .flex-grow-1
+                      strong.d-block.text-white Recomendación:
+                      span.text-secondary= composicion.objetivo
+                    button.btn-close-manual.ms-3.flex-shrink-0(type='button', onclick="this.closest('.alert').style.display='none'", title='Cerrar')
+                      i.bi.bi-x-lg
+
+              else
+                //- SIN DATOS
+                .text-center.py-5
+                  .mb-3
+                    .rounded-circle.bg-dark.p-4.d-inline-flex.align-items-center.justify-content-center(style='width: 80px; height: 80px; border: 2px solid rgba(250, 204, 21, 0.3)')
+                      i.bi.bi-clipboard-pulse.text-gold.fs-1
+                  h4.text-white.fw-bold.mb-2 Registra tu peso para ver tu progreso
+                  p.text-secondary.mb-0 Una vez que registres tu peso, verás tu IMC, grasa corporal y recomendaciones.
+
+          //- GRÁFICAS SIMPLES
+          .row.g-4
+            .col-md-6
+              .card.glass-card.h-100
+                .card-body
+                  h5.fw-bold.mb-2.text-white
+                    i.bi.bi-bar-chart-fill.text-gold.me-2
+                    | Plan Mensual
+                  p.text-muted.small.mb-3 Días entrenados por semana del mes
+                  canvas#chartPlanMensual(height="220")
+            .col-md-6
+              .card.glass-card.h-100
+                .card-body
+                  h5.fw-bold.mb-2.text-white
+                    i.bi.bi-arrow-trend-up.text-gold.me-2
+                    | Evolución de Peso
+                  p.text-muted.small.mb-3 Tu progreso en kilogramos
+                  canvas#chartPeso(height="220")
+
+        //- COLUMNA DERECHA: PESO
+        .col-lg-4
+          //- RESUMEN RÁPIDO
+          .card.glass-card.mb-4
+            .card-body.p-4
+              h5.fw-bold.text-white.mb-3
+                i.bi.bi-clipboard-data.text-gold.me-2
+                | Resumen del Mes
+              .d-flex.justify-content-between.align-items-center.p-3.bg-dark-subtle.rounded-3.mb-2
+                span.text-muted
+                  i.bi.bi-fire.me-1
+                  | Días entrenados
+                span.text-gold.fw-bold.fs-5 #{totalDiasEntrenadosMes || 0}
+              .d-flex.justify-content-between.align-items-center.p-3.bg-dark-subtle.rounded-3
+                span.text-muted
+                  i.bi.bi-speedometer.me-1
+                  | Peso actual
+                span.text-white.fw-bold.fs-5 #{pesoActual ? pesoActual.toFixed(1) + ' kg' : '—'}
+
+          //- REGISTRAR PESO
+          .card.glass-card
+            .card-header.bg-transparent.border-bottom.border-secondary
+              h5.mb-0.text-white
+                i.bi.bi-plus-circle-fill.text-gold.me-2
+                | Actualizar Peso
+            .card-body
+              if puedeActualizar
+                form(action='/cliente/progreso', method='POST')
+                  .mb-3
+                    label.form-label.text-secondary Peso (kg)
+                    .input-group
+                      span.input-group-text.bg-dark.border-secondary.text-gold
+                        i.bi.bi-speedometer
+                      input.form-control.bg-dark.text-white.border-secondary(type='number', step='0.01', name='peso', required, placeholder='Ej: 75.5', min='20', max='300')
+
+                  .mb-3
+                    label.form-label.text-secondary Observaciones (Opcional)
+                    textarea.form-control.bg-dark.text-white.border-secondary(name='observaciones', rows='2', placeholder='¿Cómo te sentiste?')
+
+                  button.btn.btn-gold.w-100(type='submit')
+                    i.bi.bi-check-circle.me-2
+                    | Guardar Medición
+              else
+                .text-center.py-4
+                  .rounded-circle.bg-dark.p-3.d-inline-flex.align-items-center.justify-content-center.mb-3(style='width: 60px; height: 60px; border: 2px solid rgba(250, 204, 21, 0.2)')
+                    i.bi.bi-lock-fill.text-gold.fs-4
+                  p.text-white.fw-semibold.mb-1 Medición semanal registrada
+                  p.text-muted.small.mb-0 Ya registraste tu peso esta semana. Podrás actualizarlo en unos días.
+
+  block scripts
+    script.
+      document.addEventListener('DOMContentLoaded', function() {
+        var ctxPlan = document.getElementById('chartPlanMensual');
+        var ctxPeso = document.getElementById('chartPeso');
+
+        // Datos inyectados
+        var dataSemanal = !{chartSemanal || '[]'};
+        var dataPeso = !{chartPeso || '[]'};
+
+        // GRÁFICA 1: Plan Mensual (barras)
+        if (ctxPlan && dataSemanal.length > 0) {
+          new Chart(ctxPlan, {
+            type: 'bar',
+            data: {
+              labels: dataSemanal.map(function(d) { return d.label; }),
+              datasets: [{
+                label: 'Días entrenados',
+                data: dataSemanal.map(function(d) { return d.value; }),
+                backgroundColor: ['rgba(59, 130, 246, 0.7)', 'rgba(139, 92, 246, 0.7)', 'rgba(245, 158, 11, 0.7)', 'rgba(34, 197, 94, 0.7)'],
+                borderRadius: 8,
+                borderSkipped: false
+              }]
+            },
+            options: {
+              responsive: true,
+              plugins: {
+                legend: { display: false },
+                tooltip: {
+                  callbacks: {
+                    label: function(ctx) { return ctx.raw + ' día' + (ctx.raw !== 1 ? 's' : ''); }
+                  }
+                }
+              },
+              scales: {
+                y: { beginAtZero: true, max: 7, ticks: { color: '#a1a1aa', stepSize: 1 }, grid: { color: '#3f3f46' } },
+                x: { ticks: { color: '#a1a1aa' }, grid: { display: false } }
+              }
+            }
+          });
+        }
+
+        // GRÁFICA 2: Evolución de Peso (línea)
+        // Parsear los datos de progreso que vienen del servidor
+        const progresoData = !{JSON.stringify(progreso || [])};
+
+        // GENERAR ETIQUETAS LIMPIAS (Semana 1, Semana 2, Semana 3...)
+        const etiquetasPeso = progresoData.map((p, index) => 'Semana ' + (index + 1));
+        const valoresPeso = progresoData.map(p => p.peso);
+
+        if (ctxPeso && progresoData.length > 0) {
+          new Chart(ctxPeso, {
+            type: 'line',
+            data: {
+              labels: etiquetasPeso, // <--- ESTO ARREGLA EL DESORDEN
+              datasets: [{
+                label: 'Peso (kg)',
+                data: valoresPeso,
+                borderColor: '#ffc107',
+                backgroundColor: 'rgba(255, 193, 7, 0.2)',
+                tension: 0.4,
+                fill: true,
+                pointBackgroundColor: '#ffc107',
+                pointRadius: 5
+              }]
+            },
+            options: {
+              responsive: true,
+              plugins: {
+                legend: { display: false },
+                tooltip: {
+                  backgroundColor: '#1e293b',
+                  titleColor: '#fbbf24',
+                  bodyColor: '#f1f5f9',
+                  borderColor: '#334155',
+                  borderWidth: 1,
+                  callbacks: {
+                    label: function(ctx) { return ctx.raw.toFixed(1) + ' kg'; }
+                  }
+                }
+              },
+              scales: {
+                y: {
+                  beginAtZero: false,
+                  ticks: { color: '#a1a1aa', callback: function(v) { return v + ' kg'; } },
+                  grid: { color: '#3f3f46' },
+                  title: { display: true, text: 'Peso (kg)', color: '#94a3b8', font: { size: 11 } }
+                },
+                x: {
+                  ticks: { color: '#a1a1aa' },
+                  grid: { display: false }
+                }
+              }
+            }
+          });
+        } else if (ctxPeso) {
+          ctxPeso.parentElement.innerHTML += '<div class="text-center py-3"><small class="text-muted">Registra tu peso para ver la evolución aquí</small></div>';
+        }
+      });

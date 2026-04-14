@@ -1,0 +1,89 @@
+extends ../layout
+
+block content
+  .container.mt-4
+    a.btn.btn-outline-warning.mb-4(href=`/entrenador/rutinas/${rutina.id}`)
+      i.bi.bi-arrow-left
+      |  Volver al Detalle
+    
+    .card.bg-dark.border-warning.shadow-lg
+      .card-header.bg-warning.text-dark
+        h3.mb-0.fw-bold Editar Rutina - #{rutina.dia_semana}
+
+      .card-body.text-white
+        form(action=`/entrenador/rutinas/editar/${rutina.id}` method="POST" enctype="multipart/form-data")
+          
+          .mb-3
+            label.form-label.text-warning.fw-bold Nombre de la Rutina
+            input.form-control.bg-secondary.text-white.border-0(type="text" name="nombre" value=rutina.nombre required)
+            
+          .mb-4
+            label.form-label.text-warning.fw-bold Calentamiento
+            textarea.form-control.bg-secondary.text-white.border-0(name="calentamiento" rows="3")= rutina.calentamiento
+            
+          hr.bg-secondary.mb-4
+          
+          h4.text-warning.mb-3
+            i.bi.bi-lightning-charge-fill
+            |  Ejercicios
+            
+          #ejerciciosContainer
+            if rutina.ejercicios && rutina.ejercicios.length > 0
+              each ej, index in rutina.ejercicios
+                .card.bg-secondary.border-0.mb-3.ejercicio-item
+                  .card-body
+                    .d-flex.justify-content-between.align-items-center.mb-3
+                      h5.text-white.fw-bold Ejercicio #{index + 1}
+                      
+                    .row.g-3
+                      .col-md-6
+                        label.form-label Nombre del Ejercicio
+                        input.form-control(type="text" name=`ejercicios[${index}][nombre]` value=ej.nombre required)
+                        
+                      .col-md-6
+                        label.form-label.text-muted Subir GIF / Imagen (Opcional)
+                        input.form-control.bg-dark.text-light.border-secondary(type="file" name=`ejercicios[${index}][gif_file]` accept="image/*")
+                        
+                        //- Input oculto para conservar la ruta anterior si el entrenador no sube nada nuevo
+                        input(type="hidden" name=`ejercicios[${index}][gif_viejo]` value=ej.gif)
+                        
+                        if ej.gif
+                          small.text-info Archivo actual cargado. Sube uno nuevo para reemplazarlo.
+                        
+                      .col-md-4
+                        label.form-label Series
+                        select.form-select(name=`ejercicios[${index}][series]`)
+                          option(value="1" selected=ej.series == '1') 1 Serie
+                          option(value="2" selected=ej.series == '2') 2 Series
+                          option(value="3" selected=ej.series == '3') 3 Series
+                          option(value="4" selected=ej.series == '4') 4 Series
+                          option(value="5" selected=ej.series == '5') 5 Series
+                          
+                      .col-md-4
+                        label.form-label Repeticiones
+                        select.form-select(name=`ejercicios[${index}][reps]`)
+                          option(value="AL FALLO" selected=(ej.reps || ej.repeticiones) == 'AL FALLO') Al Fallo
+                          option(value="5-8" selected=(ej.reps || ej.repeticiones) == '5-8') 5-8 Reps
+                          option(value="8-10" selected=(ej.reps || ej.repeticiones) == '8-10') 8-10 Reps
+                          option(value="10-12" selected=(ej.reps || ej.repeticiones) == '10-12') 10-12 Reps
+                          option(value="12-15" selected=(ej.reps || ej.repeticiones) == '12-15') 12-15 Reps
+                          option(value="15-20" selected=(ej.reps || ej.repeticiones) == '15-20') 15-20 Reps
+                          
+                      .col-md-4
+                        label.form-label Descanso
+                        select.form-select(name=`ejercicios[${index}][descanso]`)
+                          option(value="30 seg" selected=ej.descanso == '30 seg') 30 seg
+                          option(value="45 seg" selected=ej.descanso == '45 seg') 45 seg
+                          option(value="60 seg" selected=ej.descanso == '60 seg') 60 seg
+                          option(value="90 seg" selected=ej.descanso == '90 seg') 90 seg
+                          option(value="2 min" selected=ej.descanso == '2 min') 2 min
+                          option(value="3 min" selected=ej.descanso == '3 min') 3 min
+                          
+                      .col-12
+                        label.form-label Técnica / Instrucciones (Opcional)
+                        textarea.form-control(name=`ejercicios[${index}][tecnica]` rows="2")= ej.tecnica
+
+          .text-center.mt-5
+            button.btn.btn-warning.btn-lg.px-5(type="submit")
+              i.bi.bi-save-fill.me-2
+              | Guardar Cambios

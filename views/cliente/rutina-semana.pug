@@ -1,0 +1,90 @@
+extends ../layout
+
+block content
+  .container.py-4
+    if bloqueado
+      .row.justify-content-center.mt-5
+        .col-md-8
+          .alert.alert-warning.text-center.shadow-lg.border-0.bg-dark-subtle.p-5
+            .display-1.text-warning.mb-4
+              i.bi.bi-calendar-x
+            h2.fw-bold.text-light Semana No Disponible
+            p.fs-5.text-secondary.mb-4 La Semana #{semanaSolicitada} aún no está activa. Actualmente cursas la Semana #{semanaActual}. No puedes registrar entrenamientos futuros ni ver rutinas no liberadas.
+            a.btn.btn-gold.btn-lg(href="/cliente/rutinas") Volver al Plan Mensual
+    else
+      //- Header
+      .d-flex.align-items-center.mb-5
+        a.btn.btn-outline-gold.me-3(href='/cliente/rutinas')
+          i.bi.bi-arrow-left
+        div
+          h1.display-5.fw-bold.mb-0
+            span.text-gold Semana #{semana}
+          p.text-secondary.fs-5.mt-1 Detalle de rutinas y registro
+
+      //- RUTINAS Y MINI CALENDARIO EN DOS COLUMNAS (Pantallas Grandes)
+      .row.g-4
+        //- COLUMNA IZQUIERDA: RUTINAS ASIGNADAS
+        .col-lg-8
+          .card.glass-card.h-100
+            .card-header.bg-transparent.border-bottom.border-secondary.py-3
+              h4.mb-0.fw-bold.text-light
+                i.bi.bi-card-checklist.text-gold.me-2
+                | Rutinas Asignadas
+            .card-body.p-4
+              .row.g-3
+                each dia in diasSemana
+                  - const rutinaDia = rutinas.find(r => r.dia_semana === dia.nombre)
+                  
+                  .col-md-6.col-xl-4
+                    .card.bg-dark-subtle.border-secondary.h-100.text-center
+                      .card-body.d-flex.flex-column.justify-content-center.p-3
+                        h5.fw-bold.text-gold.mb-3= dia.nombre
+                        if rutinaDia
+                          h6.text-light.text-truncate.mb-3(title=rutinaDia.nombre)= rutinaDia.nombre
+                          a.btn.btn-sm.btn-outline-gold.w-100.mt-auto(href=`/cliente/rutinas/detalle/${rutinaDia.id}`) 
+                            i.bi.bi-eye-fill.me-1
+                            | Ver Rutina
+                        else
+                          p.small.text-muted.mb-3 Sin asignar
+                          if tipoMembresia === 'plus' || tipoMembresia === 'premium'
+                            a.btn.btn-sm.btn-outline-secondary.w-100.mt-auto(href="/cliente/solicitar-rutina") Solicitar Rutina
+                          else
+                            span.badge.bg-secondary.mt-auto.py-2(title="Exclusivo Plus o Premium")
+                              i.bi.bi-lock-fill.me-1
+
+        //- COLUMNA DERECHA: MINI CALENDARIO
+        .col-lg-4
+          .card.glass-card.h-100
+            .card-header.bg-transparent.border-bottom.border-secondary.py-3
+              h4.mb-0.fw-bold.text-light
+                i.bi.bi-check-circle-fill.text-gold.me-2
+                | Registro
+            .card-body.p-4
+              p.text-muted.small.mb-4 Marca los días de la semana #{semana} que ya entrenaste:
+              
+              if !esPremium
+                .premium-banner.text-center.p-4.bg-dark.rounded.border.border-warning
+                  h4.text-warning 🔒 Función Premium
+                  p Actualiza tu plan para registrar tu asistencia diaria y llevar un control estricto de tu progreso.
+                  a.btn.btn-warning(href="/cliente/membresia") Mejorar a Premium
+              else
+                .mini-calendario
+                  each dia in diasSemana
+                    - const entrenado = logs.some(l => l.dia_semana === dia.nombre)
+                    - const tieneRutina = rutinas.some(r => r.dia_semana === dia.nombre)
+                    
+                    .mini-dia.d-flex.align-items-center.justify-content-between.mb-2.p-3.rounded-3(
+                      class=entrenado ? 'activo border-success shadow-sm' : 'border border-secondary bg-dark'
+                    )
+                      span.fw-semibold(class=entrenado ? 'text-white' : 'text-secondary')
+                        | #{dia.nombre}
+                      
+                      if !tieneRutina
+                        button.btn.btn-sm.rounded-pill.btn-secondary.min-btn-w(disabled) Sin Asignar
+                      else
+                        if entrenado
+                          button.btn.btn-sm.rounded-pill.btn-success.min-btn-w(disabled)
+                            i.bi.bi-check-lg.me-1
+                            | Listo
+                        else
+                          button.btn.btn-sm.rounded-pill.btn-outline-light.min-btn-w(disabled) Pendiente

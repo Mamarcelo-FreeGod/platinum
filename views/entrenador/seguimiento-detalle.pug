@@ -1,0 +1,213 @@
+extends ../layout
+
+block content
+  script(src="https://cdn.jsdelivr.net/npm/chart.js")
+  .container.py-4
+    .d-flex.align-items-center.mb-4
+      a.btn.btn-outline-secondary.me-3(href='/entrenador/seguimiento')
+        i.bi.bi-arrow-left
+      div
+        h1.display-6.fw-bold
+          i.bi.bi-person-lines-fill.me-2.text-gold
+          | Progreso de #{cliente.nombre}
+        p.text-secondary.mb-0 Historial, métricas corporales y constancia
+
+    .row.g-4.mb-4
+      //- Panel Métricas
+      if composicion
+        .col-md-8
+          .card.glass-card.h-100
+            .card-body.p-4
+              h5.fw-bold.text-white.mb-3
+                i.bi.bi-activity.text-gold.me-2
+                | Composición Corporal
+              .row.g-3
+                .col-6.col-md-3
+                  .p-3.bg-dark-subtle.rounded.text-center
+                    h6.text-muted.mb-1 Peso
+                    h4.text-white.mb-0 #{ultimoProgreso.peso}
+                      small.fs-6  kg
+                .col-6.col-md-3
+                  .p-3.bg-dark-subtle.rounded.text-center
+                    h6.text-muted.mb-1 Estatura
+                    h4.text-white.mb-0 #{composicion.estaturaInt}
+                      small.fs-6  cm
+                .col-6.col-md-3
+                  .p-3.bg-dark-subtle.rounded.text-center
+                    h6.text-muted.mb-1 IMC
+                    h4.mb-0(class=(composicion.imc > 25 ? 'text-warning' : 'text-success')) #{composicion.imc}
+                .col-6.col-md-3
+                  .p-3.bg-dark-subtle.rounded.text-center
+                    h6.text-muted.mb-1 Grasa
+                    h4.text-gold.mb-0 #{composicion.grasa}%
+              .mt-3
+                .d-flex.justify-content-between.mb-1
+                  span.text-white.small Clasificación:
+                  span.badge.bg-gold.text-dark #{composicion.clasificacion}
+                .d-flex.justify-content-between
+                  span.text-white.small Sugerencia:
+                  span.text-secondary.small #{composicion.objetivo}
+      else
+        .col-md-8
+          .card.glass-card.h-100
+            .card-body.p-4.text-center
+              i.bi.bi-clipboard-pulse.display-4.text-muted.mb-3
+              h5.text-secondary Sin datos corporales registrados
+              p.text-muted.small El cliente no tiene peso reciente o datos físicos en sus solicitudes.
+      
+      .col-md-4
+        .card.glass-card.h-100
+          .card-body.p-4.text-center
+            i.bi.bi-calendar2-check.display-4.text-gold.mb-2
+            h2.fw-bold.text-white #{diasEntrenadosMes}
+            p.text-secondary Días entrenados este mes
+    
+    //- Gráficas de Constancia y Peso
+    .row.mb-4
+      .col-md-6
+        if logsEntrenamiento && logsEntrenamiento.length > 0
+          .card.glass-card.h-100
+            .card-body.p-4
+              h5.fw-bold.text-white.mb-3
+                i.bi.bi-bar-chart-fill.text-gold.me-2
+                | Constancia Semanal (últimas 4 semanas)
+              canvas#chartConstanciaEntrenador(height='150')
+      .col-md-6
+        .card.glass-card.h-100
+          .card-body.p-4
+            h5.fw-bold.text-white.mb-3
+              i.bi.bi-arrow-trend-up.text-gold.me-2
+              | Evolución de Peso
+            if progreso && progreso.length > 0
+              canvas#chartPesoEntrenador(height='150')
+            else
+              .text-center.py-5
+                i.bi.bi-graph-up.text-muted.display-4.mb-3
+                h6.text-secondary Sin registros de peso
+
+    //- Historial de progreso
+    h4.text-warning.mt-5.mb-3 
+      i.bi.bi-clock-history.me-2
+      |  Historial de Progreso Corporal
+
+    if progreso.length === 0
+      p.text-muted Este cliente aún no ha registrado su peso.
+    else
+      .table-responsive
+        table.table.table-dark.table-hover.align-middle.rounded.overflow-hidden
+          thead.text-warning
+            tr
+              th Fecha
+              th Peso Registrado
+              th Observaciones del Cliente
+              th Feedback del Entrenador
+              th Acción
+          tbody
+            each log in progreso
+              tr
+                td #{new Date(log.fecha).toLocaleDateString()}
+                td.fw-bold #{log.peso} kg
+                td.text-muted #{log.observaciones || 'Sin observaciones'}
+                td 
+                  if log.comentarios_entrenador
+                    span.text-success.fw-bold ✓ Feedback enviado
+                  else
+                    span.text-secondary Pendiente
+                td
+                  button.btn.btn-sm.btn-outline-warning(data-bs-toggle="modal" data-bs-target=`#modalFeedback${log.id}`)
+                    i.bi.bi-chat-dots.me-1
+                    |  Ver / Feedback
+
+              //- Modal para cada registro
+              .modal.fade(id=`modalFeedback${log.id}` tabindex="-1" aria-hidden="true")
+                .modal-dialog.modal-dialog-centered
+                  .modal-content.bg-dark.text-light.border-warning
+                    .modal-header.border-secondary
+                      h5.modal-title Registro del #{new Date(log.fecha).toLocaleDateString()}
+                      button.btn-close.btn-close-white(type="button" data-bs-dismiss="modal" aria-label="Close")
+                    
+                    form(action=`/entrenador/progreso/feedback/${log.id}` method="POST")
+                      .modal-body
+                        p.mb-1.text-warning Peso: 
+                          span.text-white #{log.peso} kg
+                        p.mb-3.text-warning Observación del cliente: 
+                          span.text-white #{log.observaciones || 'N/A'}
+                        
+                        .mb-3
+                          label.form-label Tu Comentario / Feedback:
+                          textarea.form-control.bg-secondary.text-white.border-0(name="comentarios_entrenador" rows="4" placeholder="Escribe tu análisis aquí...") #{log.comentarios_entrenador}
+                      
+                      .modal-footer.border-secondary
+                        button.btn.btn-secondary(type="button" data-bs-dismiss="modal") Cancelar
+                        button.btn.btn-warning(type="submit") Guardar Feedback
+
+  block scripts
+    script.
+      // Parsear datos desde el backend
+      const progresoData = !{JSON.stringify(progreso)};
+      const logsData = !{JSON.stringify(logsEntrenamiento || [])};
+
+      // --- GRÁFICA 1: CONSTANCIA SEMANAL ---
+      // Preparamos un arreglo de 4 semanas en ceros
+      const datosConstancia = [0, 0, 0, 0];
+      
+      // Llenamos el arreglo según las semanas que vengan de la BD
+      logsData.forEach(log => {
+        if(log.semana >= 1 && log.semana <= 4) {
+          datosConstancia[log.semana - 1] = log.total;
+        }
+      });
+
+      const ctxConstanciaObj = document.getElementById('chartConstanciaEntrenador');
+      if (ctxConstanciaObj) {
+        const ctxConstancia = ctxConstanciaObj.getContext('2d');
+        new Chart(ctxConstancia, {
+          type: 'bar',
+          data: {
+            labels: ['Semana 1', 'Semana 2', 'Semana 3', 'Semana 4'],
+            datasets: [{
+              label: 'Días Entrenados',
+              data: datosConstancia,
+              backgroundColor: '#ffc107',
+              borderRadius: 4
+            }]
+          },
+          options: {
+            responsive: true,
+            scales: { y: { beginAtZero: true, max: 7, ticks: { color: '#a1a1aa' }, grid: { color: '#3f3f46' } }, x: { ticks: { color: '#a1a1aa' }, grid: { display: false } } },
+            plugins: { legend: { display: false } }
+          }
+        });
+      }
+
+      // --- GRÁFICA 2: EVOLUCIÓN DE PESO ---
+      // Como la BD ya nos da el orden ASC (Viejo a Nuevo), mapeamos directo sin .reverse()
+      const etiquetasPeso = progresoData.map((p, index) => 'Semana ' + (index + 1));
+      const valoresPeso = progresoData.map(p => p.peso);
+
+      const ctxPesoObj = document.getElementById('chartPesoEntrenador');
+      if (ctxPesoObj && progresoData.length > 0) {
+        const ctxPeso = ctxPesoObj.getContext('2d');
+        new Chart(ctxPeso, {
+          type: 'line',
+          data: {
+            labels: etiquetasPeso,
+            datasets: [{
+              label: 'Peso (kg)',
+              data: valoresPeso,
+              borderColor: '#ffc107',
+              backgroundColor: 'rgba(255, 193, 7, 0.2)',
+              tension: 0.4,
+              fill: true,
+              pointBackgroundColor: '#ffc107',
+              pointRadius: 5
+            }]
+          },
+          options: {
+            responsive: true,
+            scales: { y: { beginAtZero: false, ticks: { color: '#a1a1aa' }, grid: { color: '#3f3f46' } }, x: { ticks: { color: '#a1a1aa' }, grid: { display: false } } },
+            plugins: { legend: { display: false } }
+          }
+        });
+      }
+

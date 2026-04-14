@@ -1,0 +1,76 @@
+extends ../layout
+
+block content
+  .container.py-4
+    //- Header
+    .d-flex.justify-content-between.align-items-center.mb-4
+      div
+        h1.display-6.fw-bold
+          i.bi.bi-clipboard2-pulse-fill.me-2.text-gold
+          | Solicitudes de Rutina
+        p.text-secondary.mb-0 Solicitudes de clientes que necesitan una rutina personalizada
+      a.btn.btn-outline-gold(href='/entrenador/clientes-personalizados')
+        i.bi.bi-people-fill.me-1
+        | Clientes Personalizados
+
+    if solicitudes && solicitudes.length > 0
+      .row.g-4
+        each sol in solicitudes
+          .col-md-6.col-lg-4
+            .card.glass-card.h-100
+              .card-body.p-4
+                .d-flex.align-items-center.mb-3
+                  .profile-avatar-sm.me-3
+                    i.bi.bi-person-fill.text-gold.fs-5
+                  div
+                    h5.fw-bold.mb-0.text-light= sol.cliente_nombre
+                    small.text-muted= sol.cliente_correo
+
+                .row.g-2.mb-3
+                  .col-12
+                    .p-2.rounded-3.text-center(style='background: rgba(250, 204, 21, 0.08)')
+                      small.text-muted.d-block Tipo de Solicitud
+                      span.fw-bold.text-gold= sol.tipo_solicitud ? sol.tipo_solicitud.replace('_', ' ').toUpperCase() : 'NUEVA RUTINA'
+                  
+                  if sol.peso && sol.estatura && sol.sexo
+                    .col-4
+                      .p-2.rounded-3.text-center(style='background: rgba(250, 204, 21, 0.08)')
+                        small.text-muted.d-block Peso
+                        span.fw-bold.text-light #{sol.peso} kg
+                    .col-4
+                      .p-2.rounded-3.text-center(style='background: rgba(59, 130, 246, 0.08)')
+                        small.text-muted.d-block Estatura
+                        span.fw-bold.text-light #{sol.estatura} cm
+                    .col-4
+                      .p-2.rounded-3.text-center(style='background: rgba(34, 197, 94, 0.08)')
+                        small.text-muted.d-block Sexo
+                        span.fw-bold.text-light= sol.sexo
+                        
+                  .col-12
+                    .p-2.rounded-3.text-center(style='background: rgba(245, 158, 11, 0.08)')
+                      small.text-muted.d-block Estado
+                      span.badge.bg-warning.text-dark= sol.estado
+
+                if sol.descripcion || sol.condicion
+                  .mb-3
+                    small.text-muted.d-block.mb-1
+                      i.bi.bi-clipboard2-pulse.me-1
+                      | Descripción / Objetivos:
+                    p.small.text-secondary.mb-0= sol.descripcion || sol.condicion
+
+                small.text-muted.d-block.mb-3
+                  i.bi.bi-clock.me-1
+                  = new Date(sol.created_at).toLocaleDateString('es-MX', { day: 'numeric', month: 'short', year: 'numeric' })
+
+              .card-footer.d-flex.gap-2
+                a.btn.btn-success.btn-sm.flex-fill(href=`/entrenador/solicitudes-rutina/aceptar/${sol.id}`)
+                  i.bi.bi-check-circle.me-1
+                  | Aceptar
+                a.btn.btn-outline-danger.btn-sm.flex-fill(href=`/entrenador/solicitudes-rutina/rechazar/${sol.id}`, onclick="return confirm('¿Rechazar esta solicitud?')")
+                  i.bi.bi-x-circle.me-1
+                  | Rechazar
+    else
+      .text-center.py-5
+        i.bi.bi-clipboard-check.text-muted(style='font-size: 4rem')
+        h4.text-secondary.mt-3 No hay solicitudes pendientes
+        p.text-muted Cuando un cliente solicite una rutina personalizada, aparecerá aquí.

@@ -1,0 +1,201 @@
+extends ../layout
+
+block content
+  //- Estilos en línea temporales para las cards (idealmente mover a CSS)
+  style.
+    .hero-dashboard {
+      background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.8)), url('/img/hero-fitness.png') center/cover;
+      border-radius: 20px;
+      padding: 3rem 2rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+    .fitness-card {
+      background: rgba(30, 30, 30, 0.6);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 20px;
+      transition: all 0.3s ease;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+      overflow: hidden;
+    }
+    .fitness-card:hover {
+      transform: scale(1.02);
+      box-shadow: 0 12px 40px rgba(212, 175, 55, 0.15);
+      border-color: rgba(212, 175, 55, 0.3);
+    }
+    .fitness-icon-lg {
+      font-size: 3rem;
+      background: -webkit-linear-gradient(45deg, #FFD700, #D4AF37);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 1rem;
+    }
+    .fitness-btn {
+      border-radius: 12px;
+      font-weight: 600;
+      padding: 0.6rem 1.5rem;
+      transition: all 0.3s ease;
+    }
+    .status-badge {
+      padding: 0.5rem 1rem;
+      border-radius: 12px;
+      font-weight: bold;
+      letter-spacing: 1px;
+    }
+
+  .container.py-4
+    //- SECCIÓN EXTRA: HERO DINÁMICO (Explora Rutinas)
+    .card.border-0.overflow-hidden.mb-4.hero-dynamic(style="background: linear-gradient(to right, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 100%), url('https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?auto=format&fit=crop&w=1200&q=80') center/cover; border-radius: 20px;")
+      .card-body.p-5
+        h2.fw-bold.text-white ¿No sabes qué entrenar? 💪
+        p.lead.text-light.mb-4 Explora nuestras rutinas preestablecidas y comienza hoy mismo.
+        a.btn.btn-gold.btn-lg(href='/rutinas')
+          i.bi.bi-search.me-2
+          | Ver Rutinas
+
+    //- SECCIÓN 1: HERO
+    .hero-dashboard.d-flex.flex-column.justify-content-center.align-items-start
+      h1.display-4.fw-bold.text-white.mb-2 ¡Bienvenido, #[span.text-gold= user.nombre]!
+      p.lead.text-light.mb-4 Listo para entrenar hoy 💪
+      
+      .d-flex.gap-3.align-items-center
+        if tipoMembresia
+          .status-badge.bg-dark.text-light.border.border-secondary
+            i.bi.bi-star-fill.text-gold.me-2
+            span.text-uppercase Plan #{tipoMembresia}
+          if membresia && membresia.estado === 'activa'
+            .status-badge.bg-success.text-white
+              i.bi.bi-check-circle-fill.me-2
+              | Activa
+          else
+            .status-badge.bg-danger.text-white
+              i.bi.bi-x-circle-fill.me-2
+              | Inactiva
+        else
+          .status-badge.bg-secondary.text-white
+            | Sin Membresía
+          .status-badge.bg-danger.text-white
+            i.bi.bi-x-circle-fill.me-2
+            | Inactiva
+
+    //- SECCIÓN 3: RUTINA DE HOY (Destacada)
+    - const diasSemana = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+    - const diaActual = diasSemana[new Date().getDay()];
+    .row.mb-4
+      .col-12
+        .fitness-card.p-4
+          .row.align-items-center
+            .col-md-8
+              h3.fw-bold.text-white.mb-1
+                i.bi.bi-lightning-charge-fill.text-gold.me-2
+                | Rutina de Hoy
+              h5.text-muted.mb-3= diaActual
+              if tipoMembresia
+                p.text-light Prepárate para dar lo mejor de ti. Tu rutina correspondiente al día de hoy te está esperando.
+              else
+                p.text-light No tienes una membresía activa para ver las rutinas.
+            .col-md-4.text-md-end.mt-3.mt-md-0
+              if tipoMembresia
+                a.btn.btn-gold.fitness-btn.btn-lg(href=`/cliente/rutinas/${diaActual}`)
+                  i.bi.bi-play-fill.me-2
+                  | Entrenar ahora
+              else
+                a.btn.btn-outline-gold.fitness-btn(href='/cliente/membresia') Adquirir Membresía
+
+    //- SECCIÓN 2: ACCESOS RÁPIDOS
+    h4.fw-bold.text-white.mb-3 Mi Gimnasio
+    .row.g-4.mb-5
+      //- Rutinas
+      .col-md-6.col-lg-3
+        .fitness-card.h-100.text-center.p-4.d-flex.flex-column
+          i.bi.bi-card-list.fitness-icon-lg
+          h5.fw-bold.text-white Rutinas
+          p.small.text-muted.flex-grow-1 Explora tus entrenamientos asignados
+          a.btn.btn-outline-light.fitness-btn.mt-3(href='/cliente/rutinas') Ver Rutinas
+      
+      //- Progreso
+      .col-md-6.col-lg-3
+        .fitness-card.h-100.text-center.p-4.d-flex.flex-column
+          i.bi.bi-graph-up-arrow.fitness-icon-lg
+          h5.fw-bold.text-white Mi Progreso
+          if tipoMembresia === 'premium'
+            p.small.text-muted.flex-grow-1 Calendario, gráficas y seguimiento
+            a.btn.btn-gold.fitness-btn.mt-3(href='/cliente/progreso')
+              i.bi.bi-graph-up.me-1
+              | Ver Progreso
+          else
+            p.small.text-muted.flex-grow-1 Seguimiento avanzado
+            .mt-auto
+              span.badge.bg-secondary.mb-2 Requiere Premium
+              br
+              a.btn.btn-outline-gold.btn-sm.fitness-btn(href='/cliente/membresia')
+                i.bi.bi-arrow-up-circle.me-1
+                | Mejorar Plan
+
+      //- Membresía
+      .col-md-6.col-lg-3
+        .fitness-card.h-100.text-center.p-4.d-flex.flex-column
+          i.bi.bi-credit-card-2-front.fitness-icon-lg
+          h5.fw-bold.text-white Membresía
+          if tipoMembresia
+            p.small.text-gold.fw-bold.flex-grow-1 Plan actual: #{tipoMembresia.toUpperCase()}
+          else
+            p.small.text-danger.flex-grow-1 Sin plan
+          a.btn.btn-outline-light.fitness-btn.mt-3(href='/cliente/membresia') Ver Planes
+          
+      //- Solicitar Rutina / Pagos
+      .col-md-6.col-lg-3
+        if tipoMembresia === 'plus' || tipoMembresia === 'premium'
+          .fitness-card.h-100.text-center.p-4.d-flex.flex-column
+            i.bi.bi-envelope-paper-heart.fitness-icon-lg
+            h5.fw-bold.text-white Funciones Pro
+            p.small.text-muted.flex-grow-1 Solicita ajustes a tu entrenamiento
+            a.btn.btn-outline-gold.fitness-btn.mt-3(href='/cliente/solicitar-rutina') Solicitar Rutina
+        else
+          .fitness-card.h-100.text-center.p-4.d-flex.flex-column
+            i.bi.bi-receipt.fitness-icon-lg
+            h5.fw-bold.text-white Mis Pagos
+            p.small.text-muted.flex-grow-1 Revisa tu historial de facturación
+            a.btn.btn-outline-light.fitness-btn.mt-3(href='/cliente/pagos') Ver Historial
+
+    //- SECCIÓN 4: ACTIVIDAD
+    h4.fw-bold.text-white.mb-3 Actividad Reciente
+    .row.g-4
+      .col-md-6
+        .fitness-card.p-4.h-100
+          .d-flex.align-items-center.mb-3
+            .p-2.bg-dark.rounded-3.me-3
+              i.bi.bi-clock-history.text-gold.fs-5
+            h5.fw-bold.text-white.mb-0 Últimos Pagos
+          
+          if ultimosPagos && ultimosPagos.length > 0
+            each pago in ultimosPagos
+              .d-flex.justify-content-between.align-items-center.py-2.border-bottom.border-secondary
+                div
+                  small.text-muted= new Date(pago.fecha).toLocaleDateString('es-MX')
+                  .fw-bold.text-light $#{parseFloat(pago.monto).toLocaleString('es-MX', {minimumFractionDigits: 2})}
+                div
+                  if pago.estado === 'pagado'
+                    span.badge.bg-success Pagado
+                  else
+                    span.badge.bg-warning.text-dark= pago.estado
+          else
+            .text-center.py-4
+              i.bi.bi-clock.text-muted.fs-3.mb-2
+              p.text-muted.mb-0 Sin pagos recientes
+
+      .col-md-6
+        .fitness-card.p-4.h-100
+          .d-flex.align-items-center.mb-3
+            .p-2.bg-dark.rounded-3.me-3
+              i.bi.bi-envelope.text-gold.fs-5
+            h5.fw-bold.text-white.mb-0 Solicitudes Pendientes
+          
+          .text-center.py-4
+            if solicitudesPendientes > 0
+              i.bi.bi-hourglass-split.text-warning.fs-3.mb-2
+              p.text-muted.mb-0 Tienes #[span.text-gold.fw-bold= solicitudesPendientes] solicitud(es) en revisión
+            else
+              i.bi.bi-check-circle.text-success.fs-3.mb-2
+              p.text-muted.mb-0 Todo al día. Sin solicitudes recientes.

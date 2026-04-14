@@ -1,0 +1,34 @@
+extends ../layout
+
+block content
+  .auth-container
+    .container
+      .row.justify-content-center.align-items-center.min-vh-100
+        .col-md-5.col-lg-4
+          .card.auth-card.shadow-lg.border-0
+            .card-body.p-4.p-md-5
+              .text-center.mb-4
+                i.bi.bi-trophy-fill.text-gold.display-4
+                h2.fw-bold.mt-3.text-white GYM #[span.text-gold PLATINUM]
+                p.text-muted Inicia sesión en tu cuenta
+
+              form(action='/login', method='POST')
+                .form-floating.mb-3
+                  input#correo.form-control(type='email', name='correo', placeholder='correo@ejemplo.com', required)
+                  label(for='correo')
+                    i.bi.bi-envelope.me-2
+                    | Correo electrónico
+
+                .form-floating.mb-4
+                  input#password.form-control(type='password', name='password', placeholder='Contraseña', required)
+                  label(for='password')
+                    i.bi.bi-lock.me-2
+                    | Contraseña
+
+                button.btn.btn-gold.w-100.py-3.fw-semibold(type='submit')
+                  i.bi.bi-box-arrow-in-right.me-2
+                  | Iniciar Sesión
+
+              .text-center.mt-4
+                p.text-muted.mb-0 ¿No tienes cuenta?
+                a.text-gold.fw-semibold.text-decoration-none(href='/registro') Regístrate aquí

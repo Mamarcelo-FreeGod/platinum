@@ -1,0 +1,65 @@
+extends ../layout
+
+block content
+  .container.py-4
+    .d-flex.align-items-center.mb-4
+      a.btn.btn-outline-secondary.me-3(href='/entrenador/clientes')
+        i.bi.bi-arrow-left
+      h2.fw-bold.text-white.mb-0
+        i.bi.bi-bar-chart.text-gold.me-2
+        | Progreso de #{cliente.nombre}
+
+    //- Client info
+    .card.border-0.shadow-sm.glass-card.mb-4
+      .card-body.p-4
+        .row.align-items-center
+          .col-md-8
+            .d-flex.align-items-center
+              .profile-avatar.me-3
+                i.bi.bi-person-fill.display-5.text-gold
+              div
+                h4.fw-bold.text-white.mb-1= cliente.nombre
+                p.text-muted.mb-0= cliente.correo
+                if cliente.telefono
+                  p.text-muted.mb-0
+                    i.bi.bi-telephone.me-1
+                    = cliente.telefono
+          .col-md-4.text-md-end
+            .stat-icon.bg-gold-soft.d-inline-flex.me-2
+              i.bi.bi-clipboard-check.text-gold.fs-4
+            span.display-6.fw-bold.text-gold= totalRutinas
+            .text-muted Rutinas asignadas
+
+    //- Routines
+    h4.fw-bold.text-white.mb-3
+      i.bi.bi-lightning.text-gold.me-2
+      | Rutinas Asignadas
+
+    if rutinas && rutinas.length > 0
+      .row.g-4
+        each rutina in rutinas
+          .col-md-6
+            .card.border-0.shadow-sm.glass-card.h-100
+              .card-header.border-0.d-flex.justify-content-between.align-items-center
+                h6.mb-0.text-gold
+                  i.bi.bi-lightning-fill.me-1
+                  = rutina.nombre
+                if rutina.dia_semana
+                  span.badge.bg-gold.text-dark.small= rutina.dia_semana
+              .card-body
+                p.text-light.small= rutina.descripcion
+                .d-flex.justify-content-between.text-muted.small
+                  span
+                    i.bi.bi-clock.me-1
+                    | #{rutina.duracion_min} min
+                  span
+                    i.bi.bi-calendar.me-1
+                    = new Date(rutina.fecha).toLocaleDateString('es-MX')
+    else
+      .card.border-0.shadow-sm.glass-card
+        .card-body.p-4.text-center
+          i.bi.bi-clipboard.display-4.text-muted
+          p.text-muted.mt-3 No hay rutinas asignadas a este cliente aún
+          a.btn.btn-gold.mt-2(href='/entrenador/rutinas/crear')
+            i.bi.bi-plus-circle.me-1
+            | Crear Rutina
