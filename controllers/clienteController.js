@@ -211,8 +211,32 @@ const clienteController = {
                 return res.redirect('/cliente/membresia?error=upgrade_required');
             }
 
+
+            const userId = req.session.user.id;
+            const [membresiaData] = await pool.query(`
+                SELECT fecha_inicio 
+                FROM usuario_membresia 
+                WHERE usuario_id = ? AND estado = 'activa'
+                LIMIT 1
+            `, [userId]);
+
             const hoy = new Date();
-            const semanaActual = Math.ceil(hoy.getDate() / 7);
+            let semanaActual = 1;
+
+            if (membresiaData && membresiaData.length > 0) {
+                const fechaInicio = new Date(membresiaData[0].fecha_inicio);
+
+                // Calcular la diferencia en días
+                const diferenciaTiempo = hoy.getTime() - fechaInicio.getTime();
+                const diferenciaDias = Math.floor(diferenciaTiempo / (1000 * 3600 * 24));
+
+                // Calcular la semana (1 a 4)
+                semanaActual = Math.floor(Math.max(0, diferenciaDias) / 7) + 1;
+
+                // Limitar la semana entre 1 y 4
+                if (semanaActual < 1) semanaActual = 1;
+                if (semanaActual > 4) semanaActual = 4;
+            }
 
             res.render('cliente/rutinas', {
                 title: 'Plan Mensual',
@@ -240,11 +264,33 @@ const clienteController = {
             }
 
             const esPremium = (tipoMembresia === 'premium');
-            
-            // Helper v5.4
+
+            // Helper v5.4: Calcular semanaActual de forma dinámica
             const hoy = new Date();
-            const diaMes = hoy.getDate();
-            const semanaActual = Math.ceil(diaMes / 7); // 1 a 4
+            let semanaActual = 1;
+
+
+            const [membresiaData] = await pool.query(`
+                SELECT fecha_inicio 
+                FROM usuario_membresia 
+                WHERE usuario_id = ? AND estado = 'activa'
+                LIMIT 1
+            `, [userId]);
+
+            if (membresiaData && membresiaData.length > 0) {
+                const fechaInicio = new Date(membresiaData[0].fecha_inicio);
+
+                // Calcular la diferencia en días
+                const diferenciaTiempo = hoy.getTime() - fechaInicio.getTime();
+                const diferenciaDias = Math.floor(diferenciaTiempo / (1000 * 3600 * 24));
+
+                // Calcular la semana (1 a 4)
+                semanaActual = Math.floor(Math.max(0, diferenciaDias) / 7) + 1;
+
+                // Limitar la semana entre 1 y 4
+                if (semanaActual < 1) semanaActual = 1;
+                if (semanaActual > 4) semanaActual = 4;
+            }
 
             if (semana > semanaActual) {
                 return res.render('cliente/rutina-semana', {
@@ -256,17 +302,17 @@ const clienteController = {
                 });
             }
 
-            const pool = require('../config/db');
+
             const [rutinas] = await pool.query('SELECT * FROM rutinas WHERE usuario_id = ? AND semana = ?', [userId, semana]);
             const [logs] = await pool.query('SELECT * FROM entrenamiento_log WHERE usuario_id = ? AND semana = ?', [userId, semana]);
-            
+
             // Estático de Lunes a Domingo v5.6
             const nombresDiasFijos = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
             const diasSemana = [];
 
             // Helper format
-            hoy.setHours(0,0,0,0);
-            
+            hoy.setHours(0, 0, 0, 0);
+
             for (let i = 0; i < nombresDiasFijos.length; i++) {
                 const nombreStr = nombresDiasFijos[i];
 
@@ -276,7 +322,7 @@ const clienteController = {
                     // Así prevenimos el desorden y los saltos artificiales del v5.4
                 });
             }
-            
+
             res.render('cliente/rutina-semana', {
                 title: 'Semana ' + semana,
                 semana,
@@ -301,22 +347,44 @@ const clienteController = {
         try {
             const userId = req.session.user.id;
             const { semana, dia } = req.body;
-            
+
             if (!semana || !dia) {
                 return res.status(400).json({ ok: false, error: 'Semana y día requeridos' });
             }
-            
+
             const hoy = new Date();
-            const diaMes = hoy.getDate();
-            const semanaActual = Math.ceil(diaMes / 7);
-            
+            let semanaActual = 1;
+
+
+            const [membresiaData] = await pool.query(`
+                SELECT fecha_inicio 
+                FROM usuario_membresia 
+                WHERE usuario_id = ? AND estado = 'activa'
+                LIMIT 1
+            `, [userId]);
+
+            if (membresiaData && membresiaData.length > 0) {
+                const fechaInicio = new Date(membresiaData[0].fecha_inicio);
+
+                // Calcular la diferencia en días
+                const diferenciaTiempo = hoy.getTime() - fechaInicio.getTime();
+                const diferenciaDias = Math.floor(diferenciaTiempo / (1000 * 3600 * 24));
+
+                // Calcular la semana (1 a 4)
+                semanaActual = Math.floor(Math.max(0, diferenciaDias) / 7) + 1;
+
+                // Limitar la semana entre 1 y 4
+                if (semanaActual < 1) semanaActual = 1;
+                if (semanaActual > 4) semanaActual = 4;
+            }
+
             if (semana > semanaActual) {
                 return res.status(403).json({ ok: false, error: 'Semana futura bloqueada' });
             }
-            
-            const pool = require('../config/db');
+
+
             const [existe] = await pool.query('SELECT id FROM entrenamiento_log WHERE usuario_id = ? AND semana = ? AND dia_semana = ?', [userId, semana, dia]);
-            
+
             if (existe.length > 0) {
                 await pool.query('DELETE FROM entrenamiento_log WHERE usuario_id = ? AND semana = ? AND dia_semana = ?', [userId, semana, dia]);
                 return res.json({ ok: true, action: 'removed' });
@@ -339,8 +407,8 @@ const clienteController = {
         try {
             const rutina_id = req.params.id;
             const usuario_id = req.session.user.id;
-            
-            const pool = require('../config/db');
+
+
             const [rutinaRows] = await pool.query(`
               SELECT * FROM rutinas 
               WHERE id = ? AND usuario_id = ?
@@ -352,12 +420,12 @@ const clienteController = {
             }
 
             const rutina = rutinaRows[0];
-            
+
             // Parse for JSON
             if (typeof rutina.ejercicios === 'string') {
                 try {
                     rutina.ejercicios = JSON.parse(rutina.ejercicios);
-                } catch(e) {
+                } catch (e) {
                     rutina.ejercicios = [];
                 }
             } else if (!rutina.ejercicios) {
@@ -382,10 +450,10 @@ const clienteController = {
             const entrenado = logRows.length > 0;
 
             res.render('cliente/rutina-detalle', {
-              title: `Rutina del ${rutina.dia_semana}`,
-              rutina,
-              entrenado,
-              tipoMembresia
+                title: `Rutina del ${rutina.dia_semana}`,
+                rutina,
+                entrenado,
+                tipoMembresia
             });
         } catch (error) {
             console.error('Error al cargar detalle de rutina:', error);
@@ -491,7 +559,7 @@ const clienteController = {
                 data.sexo = sexo;
                 data.tipo_solicitud = 'nueva_rutina';
                 data.descripcion = condicion || 'Solicitud inicial';
-                
+
                 notificacionMsg = `Nueva solicitud de rutina de ${req.session.user.nombre}. Peso: ${peso}kg, Estatura: ${estatura}cm.`;
             } else {
                 // Solicitud simple
@@ -502,7 +570,7 @@ const clienteController = {
                 data.tipo_solicitud = tipo_solicitud;
                 data.descripcion = descripcion;
                 data.rutina_id = rutina_id || null;
-                
+
                 notificacionMsg = `Nueva solicitud de ${req.session.user.nombre}: ${tipo_solicitud}.`;
             }
 
@@ -643,7 +711,7 @@ const clienteController = {
                     'SELECT semana, COUNT(*) as total FROM entrenamiento_log WHERE usuario_id = ? AND YEAR(fecha) = ? AND MONTH(fecha) = ? GROUP BY semana',
                     [userId, year, month]
                 );
-                rows.forEach(function(r) {
+                rows.forEach(function (r) {
                     if (r.semana >= 1 && r.semana <= 4) {
                         chartSemanalData[r.semana - 1].value = r.total;
                         totalDiasEntrenadosMes += r.total;
@@ -725,7 +793,7 @@ const clienteController = {
             lunesHoy.setHours(0, 0, 0, 0);
 
             const mapaFechas = {};
-            diasValidos.forEach(function(d, i) {
+            diasValidos.forEach(function (d, i) {
                 const fecha = new Date(lunesHoy);
                 fecha.setDate(lunesHoy.getDate() + i);
                 mapaFechas[d] = fecha.toISOString().split('T')[0];
@@ -869,19 +937,19 @@ const clienteController = {
             }
 
             const entrenamientos = await EntrenamientoLog.getByUsuarioIdAndMonth(userId, year, month) || [];
-            
+
             // FIX: Validar y parsear fecha correctamente desde objeto Date MySQL
-            const diasEntrenados = entrenamientos.map(function(e) {
+            const diasEntrenados = entrenamientos.map(function (e) {
                 if (!e || !e.fecha) return null;
                 return new Date(e.fecha).getDate();
-            }).filter(function(d) { return d !== null; });
+            }).filter(function (d) { return d !== null; });
 
             const primerDia = new Date(year, month - 1, 1);
             const ultimoDia = new Date(year, month, 0);
             var primerDiaSemana = primerDia.getDay();
             primerDiaSemana = primerDiaSemana === 0 ? 6 : primerDiaSemana - 1;
 
-            const meses = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+            const meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
 
             res.json({
                 year,
@@ -910,14 +978,14 @@ const clienteController = {
 
             // Obtener entrenadores del cliente
             const entrenadores = await MensajeChat.getEntrenadoresDeCliente(userId);
-            
+
             // Obtener contactos con historial de chat
             const contactos = await MensajeChat.getContactos(userId);
 
             // Mezclar entrenadores y contactos (sin duplicados)
-            const contactoIds = contactos.map(function(c) { return c.contacto_id; });
+            const contactoIds = contactos.map(function (c) { return c.contacto_id; });
             var todosContactos = contactos.slice();
-            entrenadores.forEach(function(e) {
+            entrenadores.forEach(function (e) {
                 if (!contactoIds.includes(e.id)) {
                     todosContactos.push({
                         contacto_id: e.id,
@@ -1060,7 +1128,7 @@ const clienteController = {
             const now = new Date();
             const year = now.getFullYear();
             const month = now.getMonth();
-            
+
             // Calcular la fecha: día 1 del mes + offset de semana + offset de día
             const diaIndex = diasValidos.indexOf(dia); // 0=Lunes ... 6=Domingo
             const primerDia = new Date(year, month, 1);
@@ -1068,7 +1136,7 @@ const clienteController = {
             primerDiaSemana = primerDiaSemana === 0 ? 6 : primerDiaSemana - 1; // Convertir a 0=Lun
 
             const diaDelMes = 1 + ((semanaNum - 1) * 7) + diaIndex - primerDiaSemana;
-            
+
             // Validar que el día está dentro del mes
             const ultimoDia = new Date(year, month + 1, 0).getDate();
             if (diaDelMes < 1 || diaDelMes > ultimoDia) {
@@ -1076,7 +1144,7 @@ const clienteController = {
             }
 
             const fechaStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(diaDelMes).padStart(2, '0')}`;
-            
+
             // Bloquear fechas futuras
             const hoy = now.toISOString().split('T')[0];
             if (fechaStr > hoy) {
