@@ -144,8 +144,8 @@ block content
   block scripts
     script.
       // Parsear datos desde el backend
-      const progresoData = !{JSON.stringify(progreso)};
-      const logsData = !{JSON.stringify(logsEntrenamiento || [])};
+      const progresoData = JSON.parse(decodeURIComponent('#{encodeURIComponent(JSON.stringify(progreso))}'));
+      const logsData = JSON.parse(decodeURIComponent('#{encodeURIComponent(JSON.stringify(logsEntrenamiento || []))}'));
 
       // --- GRÁFICA 1: CONSTANCIA SEMANAL ---
       // Preparamos un arreglo de 4 semanas en ceros

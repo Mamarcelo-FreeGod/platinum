@@ -14,6 +14,7 @@ const SolicitudRutina = require('../models/SolicitudRutina');
 const Progreso = require('../models/Progreso');
 const MensajeChat = require('../models/MensajeChat');
 const pool = require('../config/db');
+const { escapeHTML } = require('../utils/sanitize');
 
 /**
  * Procesa archivos de media subidos y los asigna a cada ejercicio por índice.
@@ -225,14 +226,40 @@ const entrenadorController = {
             const semanasArray = Array.isArray(semanas) ? semanas : (semanas ? [semanas] : []);
             const diasArray = Array.isArray(dias) ? dias : (dias ? [dias] : []);
             
-            // 2. Convertir ejercicios a JSON
-            let ejerciciosJSON = null;
+            // 2. Parsear ejercicios desde JSON string
+            let ejerciciosArray = [];
             if (ejercicios) {
-                // Si el frontend lo mandó como hidden input String, o como Object map
-                ejerciciosJSON = typeof ejercicios === 'string' ? ejercicios : JSON.stringify(ejercicios);
+                try {
+                    ejerciciosArray = typeof ejercicios === 'string' ? JSON.parse(ejercicios) : ejercicios;
+                } catch (e) {
+                    ejerciciosArray = [];
+                }
             }
 
-            // 3. Bucle para insertar una rutina por cada combinación de Semana y Día
+            // 3. Mapear archivos subidos a sus ejercicios correspondientes
+            // Los file inputs del frontend tienen name="media_ejercicio_0", "media_ejercicio_1", etc.
+            // SYNC: Usamos las mismas keys que postEditarRutina para consistencia:
+            //   - "gif"   → usado por entrenador/rutina-detalle.pug, rutina-editar.pug, rutinas/detalle.pug
+            //   - "media" → usado por cliente/rutina-dia.pug, cliente/rutina-detalle.pug
+            if (req.files && req.files.length > 0) {
+                req.files.forEach(function(file) {
+                    // Extraer el índice del fieldname (media_ejercicio_0 → 0)
+                    const match = file.fieldname.match(/media_ejercicio_(\d+)/);
+                    if (match) {
+                        const idx = parseInt(match[1]);
+                        if (ejerciciosArray[idx]) {
+                            const rutaArchivo = '/uploads/gifs/' + file.filename;
+                            ejerciciosArray[idx].gif = rutaArchivo;
+                            ejerciciosArray[idx].media = rutaArchivo;
+                        }
+                    }
+                });
+            }
+
+            // 4. Convertir a JSON para la DB
+            const ejerciciosJSON = ejerciciosArray.length > 0 ? JSON.stringify(ejerciciosArray) : null;
+
+            // 5. Bucle para insertar una rutina por cada combinación de Semana y Día
             for (const semana of semanasArray) {
                 for (const dia of diasArray) {
                     if (semana && dia) { // Validar que no estén vacíos
@@ -293,7 +320,9 @@ const entrenadorController = {
                     tecnica: ej.tecnica,
                     // Si subió un archivo nuevo, guardamos la nueva ruta local. 
                     // Si no, conservamos el gif_viejo que mandamos oculto desde el frontend.
-                    gif: file ? `/uploads/gifs/${file.filename}` : ej.gif_viejo
+                    // SYNC: Seteamos ambas keys para que todas las vistas rendericen correctamente
+                    gif: file ? `/uploads/gifs/${file.filename}` : ej.gif_viejo,
+                    media: file ? `/uploads/gifs/${file.filename}` : ej.gif_viejo
                 };
             });
 
@@ -946,7 +975,7 @@ const entrenadorController = {
             await MensajeChat.create({
                 emisor_id: entrenadorId,
                 receptor_id: parseInt(receptor_id),
-                mensaje: mensaje.trim()
+                mensaje: escapeHTML(mensaje.trim())
             });
 
             // Notificar al cliente

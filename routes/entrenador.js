@@ -31,7 +31,7 @@ router.get('/dashboard', entrenadorController.dashboard);
 // Rutinas - ahora muestra lista de clientes con rutinas
 router.get('/rutinas', entrenadorController.rutinas);
 router.get('/rutinas/crear', entrenadorController.showCrearRutina);
-router.post('/rutinas/crear', upload.array('media_ejercicio', 20), entrenadorController.crearRutina);
+router.post('/rutinas/crear', uploadGifs.any(), entrenadorController.crearRutina);
 router.get('/rutinas/cliente/:id/crear', entrenadorController.crearRutinaCliente);
 router.get('/rutinas/cliente/:id', entrenadorController.rutinasCliente);
 router.get('/rutinas/editar/:id', entrenadorController.getEditarRutina);

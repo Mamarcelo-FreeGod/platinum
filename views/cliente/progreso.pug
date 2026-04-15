@@ -185,8 +185,8 @@ block content
         var ctxPeso = document.getElementById('chartPeso');
 
         // Datos inyectados
-        var dataSemanal = !{chartSemanal || '[]'};
-        var dataPeso = !{chartPeso || '[]'};
+        var dataSemanal = JSON.parse(decodeURIComponent('#{encodeURIComponent(chartSemanal || "[]")}'));
+        var dataPeso = JSON.parse(decodeURIComponent('#{encodeURIComponent(chartPeso || "[]")}'));
 
         // GRÁFICA 1: Plan Mensual (barras)
         if (ctxPlan && dataSemanal.length > 0) {
@@ -222,7 +222,7 @@ block content
 
         // GRÁFICA 2: Evolución de Peso (línea)
         // Parsear los datos de progreso que vienen del servidor
-        const progresoData = !{JSON.stringify(progreso || [])};
+        const progresoData = JSON.parse(decodeURIComponent('#{encodeURIComponent(JSON.stringify(progreso || []))}'));
 
         // GENERAR ETIQUETAS LIMPIAS (Semana 1, Semana 2, Semana 3...)
         const etiquetasPeso = progresoData.map((p, index) => 'Semana ' + (index + 1));

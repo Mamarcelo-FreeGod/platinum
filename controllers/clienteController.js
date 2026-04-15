@@ -15,6 +15,7 @@ const Progreso = require('../models/Progreso');
 const EntrenamientoLog = require('../models/EntrenamientoLog');
 const MensajeChat = require('../models/MensajeChat');
 const pool = require('../config/db');
+const { escapeHTML } = require('../utils/sanitize');
 
 const clienteController = {
     /**
@@ -1044,7 +1045,7 @@ const clienteController = {
             await MensajeChat.create({
                 emisor_id: userId,
                 receptor_id: parseInt(receptor_id),
-                mensaje: mensaje.trim()
+                mensaje: escapeHTML(mensaje.trim())
             });
 
             res.redirect('/cliente/chat?con=' + receptor_id);

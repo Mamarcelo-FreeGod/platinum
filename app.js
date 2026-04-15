@@ -8,6 +8,8 @@ const session = require('express-session');
 const flash = require('connect-flash');
 const path = require('path');
 
+const { sanitizeMiddleware } = require('./utils/sanitize');
+
 const app = express();
 
 // ==================== CONFIGURACIÓN ====================
@@ -24,13 +26,26 @@ app.use(express.json());
 // Archivos estáticos
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Sanitización global XSS — escapa caracteres peligrosos en req.body
+app.use(sanitizeMiddleware);
+
+// Headers de seguridad
+app.use((req, res, next) => {
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+    res.setHeader('X-XSS-Protection', '1; mode=block');
+    res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+    next();
+});
+
 // Sesiones
 app.use(session({
     secret: process.env.SESSION_SECRET || 'gym_platinum_secret',
     resave: false,
     saveUninitialized: false,
     cookie: {
-
+        httpOnly: true,
+        sameSite: 'lax',
         maxAge: 1000 * 60 * 60 * 24 // 24 horas
     }
 }));

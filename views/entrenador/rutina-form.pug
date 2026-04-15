@@ -135,7 +135,7 @@ block content
           label.form-label.text-muted
             i.bi.bi-image.me-1.text-gold
             | Imagen / GIF del ejercicio
-          input.form-control.ej-media(type='file', name='media_ejercicio', accept='image/*,image/gif')
+          input.form-control.ej-media(type='file', accept='image/*,image/gif')
 
   //- Scripts
   script.
@@ -166,11 +166,13 @@ block content
       var clone = template.content.cloneNode(true);
       container.appendChild(clone);
       actualizarConteo();
+      reindexarFileInputs();
     }
 
     function eliminarEjercicio(btn) {
       btn.closest('.ejercicio-block').remove();
       actualizarConteo();
+      reindexarFileInputs();
       var blocks = document.querySelectorAll('.ejercicio-block');
       if (blocks.length === 0) {
         var empty = document.getElementById('ejerciciosEmpty');
@@ -184,6 +186,17 @@ block content
       blocks.forEach(function(b, i) {
         var badge = b.querySelector('.ejercicio-badge');
         if (badge) badge.textContent = '#' + (i + 1);
+      });
+    }
+
+    // Asignar name indexado a cada file input para que multer los reciba correctamente
+    function reindexarFileInputs() {
+      var blocks = document.querySelectorAll('.ejercicio-block');
+      blocks.forEach(function(b, i) {
+        var fileInput = b.querySelector('.ej-media');
+        if (fileInput) {
+          fileInput.name = 'media_ejercicio_' + i;
+        }
       });
     }
 
@@ -203,6 +216,10 @@ block content
         return;
       }
 
+      // Re-indexar file inputs antes de enviar
+      reindexarFileInputs();
+
+      // Serializar datos de ejercicios (sin archivos, esos van por multipart)
       var blocks = document.querySelectorAll('.ejercicio-block');
       var ejercicios = [];
       blocks.forEach(function(block) {
