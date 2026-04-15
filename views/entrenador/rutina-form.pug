@@ -24,11 +24,15 @@ block content
             .card-body.p-4
               .row.g-3
                 .col-md-4
-                  label.form-label.text-muted Cliente *
-                  select.form-select(name='cliente_id', required)
-                    option(value='', disabled, selected) Selecciona un cliente
-                    each cliente in clientes
-                      option(value=cliente.id)= cliente.nombre
+                  .form-group
+                    label.form-label.text-muted.small Cliente *
+                    select.form-select.bg-dark.text-light.border-secondary(name='cliente_id', required)
+                      option(value='', disabled, selected) Selecciona un cliente
+                      if clientes && clientes.length > 0
+                        each cliente in clientes
+                          option(value=cliente.id)= cliente.nombre
+                      else
+                        option(value='', disabled) No hay clientes asignados
 
                 .col-md-4
                   label.form-label.text-muted Nombre de la Rutina *

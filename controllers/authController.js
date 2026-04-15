@@ -9,10 +9,16 @@ const authController = {
      * Mostrar formulario de login
      */
     showLogin(req, res) {
-        if (req.session.user) {
+        // Solo redirigimos si el usuario YA tiene una sesión activa y válida
+        if (req.session && req.session.user && req.session.user.rol) {
             return redirectByRole(req, res);
         }
-        res.render('auth/login', { title: 'Iniciar Sesión' });
+        // De lo contrario, renderizamos la vista de login tranquilamente
+        res.render('auth/login', { 
+            title: 'Iniciar Sesión',
+            // Agregamos esto para evitar errores si usas mensajes flash
+            messages: req.flash() 
+        });
     },
 
     /**
@@ -48,7 +54,7 @@ const authController = {
                 return res.redirect('/login');
             }
 
-            // Guardar sesión
+            // Guardar sesión de forma segura
             req.session.user = {
                 id: usuario.id,
                 nombre: usuario.nombre,
@@ -56,8 +62,14 @@ const authController = {
                 rol: usuario.rol
             };
 
-            // Redirigir según rol
-            return redirectByRole(req, res);
+            // Guardamos explícitamente la sesión antes de redirigir para evitar fallos en Render
+            req.session.save((err) => {
+                if (err) {
+                    console.error('Error al guardar sesión:', err);
+                    return res.redirect('/login');
+                }
+                return redirectByRole(req, res);
+            });
 
         } catch (error) {
             console.error('Error en login:', error);
@@ -115,7 +127,7 @@ const authController = {
                 rol: 'cliente'
             });
 
-            req.flash('success', '¡Registro exitoso! Ahora puedes iniciar sesión');
+            req.flash('success', '¡Registro exitoso! Ya puedes iniciar sesión');
             res.redirect('/login');
 
         } catch (error) {
@@ -131,6 +143,7 @@ const authController = {
     logout(req, res) {
         req.session.destroy((err) => {
             if (err) console.error('Error al cerrar sesión:', err);
+            res.clearCookie('connect.sid'); // Limpia la cookie del navegador
             res.redirect('/login');
         });
     }
@@ -141,14 +154,15 @@ const authController = {
  */
 function redirectByRole(req, res) {
     const rol = req.session.user.rol;
-    switch (rol) {
-        case 'admin':
-            return res.redirect('/admin/dashboard');
-        case 'entrenador':
-            return res.redirect('/entrenador/dashboard');
-        default:
-            return res.redirect('/cliente/dashboard');
-    }
+    // Verificamos que el rol exista para no redirigir a una ruta indefinida
+    const routes = {
+        'admin': '/admin/dashboard',
+        'entrenador': '/entrenador/dashboard',
+        'cliente': '/cliente/dashboard'
+    };
+
+    const target = routes[rol] || '/login';
+    return res.redirect(target);
 }
 
 module.exports = authController;

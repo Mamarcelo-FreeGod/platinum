@@ -11,6 +11,7 @@ const path = require('path');
 const app = express();
 
 // ==================== CONFIGURACIÓN ====================
+// app.set('trust proxy', 1);
 
 // Motor de vistas Pug
 app.set('view engine', 'pug');
@@ -29,6 +30,7 @@ app.use(session({
     resave: false,
     saveUninitialized: false,
     cookie: {
+
         maxAge: 1000 * 60 * 60 * 24 // 24 horas
     }
 }));
@@ -75,6 +77,7 @@ app.use(async (req, res, next) => {
         req.tipoMembresia = null;
         res.locals.tipoMembresia = null;
     }
+
     next();
 });
 
@@ -86,23 +89,15 @@ const entrenadorRoutes = require('./routes/entrenador');
 const notificacionRoutes = require('./routes/notificaciones');
 const rutinasRoutes = require('./routes/rutinas');
 
-app.use('/', authRoutes);
+
 app.use('/cliente', clienteRoutes);
 app.use('/admin', adminRoutes);
 app.use('/entrenador', entrenadorRoutes);
 app.use('/notificaciones', notificacionRoutes);
 app.use('/rutinas', rutinasRoutes);
 
-// Ruta raíz
-app.get('/', (req, res) => {
-    if (req.session.user) {
-        const rol = req.session.user.rol;
-        if (rol === 'admin') return res.redirect('/admin/dashboard');
-        if (rol === 'entrenador') return res.redirect('/entrenador/dashboard');
-        return res.redirect('/cliente/dashboard');
-    }
-    res.redirect('/login');
-});
+// El authRoutes manejará la raíz '/' y el '/login' internamente
+app.use('/', authRoutes);
 
 // 404
 app.use((req, res) => {

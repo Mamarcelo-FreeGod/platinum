@@ -195,10 +195,12 @@ const entrenadorController = {
         try {
             const entrenadorId = req.session.user.id;
             const [clientes] = await pool.query(`
-                SELECT u.id, u.nombre 
+                SELECT DISTINCT u.id, u.nombre 
                 FROM usuarios u
-                JOIN asignaciones a ON u.id = a.cliente_id
-                WHERE a.entrenador_id = ? AND a.activa = 1
+                LEFT JOIN asignaciones a ON u.id = a.cliente_id AND a.entrenador_id = ? AND a.activa = 1
+                LEFT JOIN solicitudes_rutina sr ON u.id = sr.usuario_id AND sr.estado = 'aceptada'
+                WHERE a.id IS NOT NULL OR sr.id IS NOT NULL
+                ORDER BY u.nombre
             `, [entrenadorId]);
 
             res.render('entrenador/rutina-form', {
@@ -347,7 +349,7 @@ const entrenadorController = {
                 return res.redirect('/entrenador/solicitudes');
             }
 
-            await SolicitudMembresia.updateEstado(solicitud.id, 'aprobada');
+            await SolicitudMembresia.updateEstado(solicitud.id, 'aceptada');
 
             const fechaInicio = new Date();
             const fechaFin = new Date();
@@ -773,15 +775,12 @@ const entrenadorController = {
         try {
             const entrenador_id = req.session.user.id;
             const [clientes] = await pool.query(`
-                SELECT u.id, u.nombre, u.correo 
+                SELECT DISTINCT u.id, u.nombre, u.correo 
                 FROM usuarios u
-                JOIN asignaciones a ON u.id = a.cliente_id
-                JOIN usuario_membresia um ON u.id = um.usuario_id
-                JOIN membresias m ON um.membresia_id = m.id
-                WHERE a.entrenador_id = ? 
-                  AND a.activa = 1 
-                  AND m.tipo = 'premium' 
-                  AND um.estado = 'activa'
+                LEFT JOIN asignaciones a ON u.id = a.cliente_id AND a.activa = 1 AND a.entrenador_id = ?
+                LEFT JOIN solicitudes_rutina sr ON u.id = sr.usuario_id AND sr.estado = 'aceptada'
+                WHERE a.id IS NOT NULL OR sr.id IS NOT NULL
+                ORDER BY u.nombre
             `, [entrenador_id]);
 
             res.render('entrenador/seguimiento', {

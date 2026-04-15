@@ -41,11 +41,11 @@ block content
                           | Efectivo
                     td= new Date(solicitud.created_at).toLocaleDateString('es-MX')
                     td
-                      if solicitud.estado === 'pendiente'
+                      if solicitud.estado === 'pendiente' || solicitud.estado === 'Pendiente'
                         span.badge.bg-warning.text-dark
-                          i.bi.bi-clock.me-1
+                          i.bi.bi-hourglass-split.me-1
                           | Pendiente
-                      else if solicitud.estado === 'aceptada'
+                      else if solicitud.estado === 'aceptada' || solicitud.estado === 'activa' || solicitud.estado === 'aprobada' || solicitud.estado === 'Aceptada'
                         span.badge.bg-success
                           i.bi.bi-check-circle.me-1
                           | Aceptada
