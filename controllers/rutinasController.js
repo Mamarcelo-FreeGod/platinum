@@ -116,7 +116,7 @@ const rutinasPredefinidas = {
                 reps: '12',
                 descanso: '60 seg',
                 tecnica: 'En la polea alta con barra recta o V, mantén los codos pegados al cuerpo a 90°. Extiende los antebrazos hacia abajo contrayendo los tríceps. No muevas los codos de posición.',
-                gif: '/img/rutinas/extension triceps en polea.gif'
+                gif: '/img/rutinas/extensiones triceps en polea.gif'
             },
             {
                 nombre: 'Press Militar',
