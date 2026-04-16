@@ -28,7 +28,7 @@ block content
                 .card.bg-secondary.border-0.h-100
                   .card-body
                     if ej.gif && ej.gif.trim() !== ''
-                      img.img-fluid.rounded.mb-3.w-100(src=ej.gif alt=ej.nombre style="height: 150px; object-fit: cover;")
+                      img.img-fluid.rounded.mb-3.mx-auto.d-block(src=ej.gif alt="GIF del ejercicio" style="max-height: 250px; width: 100%; object-fit: contain; background-color: #1e1e1e;")
                     h5.text-warning.fw-bold #{index + 1}. #{ej.nombre}
                     p.mb-1 
                       i.bi.bi-arrow-repeat.text-muted
